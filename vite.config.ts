@@ -6,9 +6,10 @@ export default defineConfig({
   root: ".", // root is project root
   base: "./", // use relative paths so assets load correctly
   build: {
-    outDir: "dist", // build goes to root/dist
-    emptyOutDir: true,
-  },
+  outDir: "client/dist", // build will be inside client/dist
+  emptyOutDir: true,
+}
+
   plugins: [react()],
   resolve: {
     alias: {
