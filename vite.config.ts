@@ -3,16 +3,16 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 
 export default defineConfig({
-  root: path.resolve(__dirname, "client"), // your React app folder
-  base: "./", // ensures relative paths for assets
+  root: ".", // root is project root
+  base: "./", // use relative paths so assets load correctly
   build: {
-    outDir: path.resolve(__dirname, "dist/spa"), // final build folder
+    outDir: "dist", // build goes to root/dist
     emptyOutDir: true,
   },
   plugins: [react()],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./client"),
+      "@": path.resolve(__dirname, "./client"), // adjust to your folder structure
       "@shared": path.resolve(__dirname, "./shared"),
     },
   },
