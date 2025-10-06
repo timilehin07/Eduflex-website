@@ -5,7 +5,7 @@ import path from "path";
 export default defineConfig({
   root: path.resolve(__dirname, "client"), // source folder
   build: {
-    outDir: path.resolve(__dirname, "client/dist"), // build output inside client/dist
+    outDir: path.resolve(__dirname, "client/dist"), // build output
     emptyOutDir: true,
   },
   resolve: {
