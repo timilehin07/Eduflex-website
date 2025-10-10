@@ -280,93 +280,41 @@ export default function CreateCourse() {
                   </span>
                 </button>
 
-                <button
-                  type="button"
-                  onClick={() =>
-                    setFormData({ ...formData, motivation: "hobby" })
-                  }
-                  className={`flex-1 flex items-center gap-3 p-4 rounded-xl border ${
-                    formData.motivation === "hobby"
-                      ? "border-[#0AEFC9] bg-[#CFC6FD]"
-                      : "border-[#454953] bg-[#222328]"
-                  } transition-colors`}
-                >
-                  <svg
-                    width="20"
-                    height="21"
-                    viewBox="0 0 20 21"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M10 4.66655C10.001 4.33324 9.93532 4.0031 9.80685 3.69555C9.67837 3.38799 9.4897 3.10923 9.25191 2.87567C9.01413 2.6421 8.73204 2.45844 8.42224 2.33549C8.11243 2.21254 7.78117 2.15278 7.44793 2.15972C7.1147 2.16667 6.78621 2.24018 6.4818 2.37593C6.17739 2.51169 5.9032 2.70694 5.67536 2.95022C5.44751 3.19349 5.27061 3.47987 5.15506 3.79251C5.03952 4.10515 4.98765 4.43774 5.00252 4.77071C4.51269 4.89666 4.05794 5.13242 3.67271 5.46014C3.28749 5.78786 2.98189 6.19894 2.77906 6.66225C2.57623 7.12556 2.48149 7.62896 2.50201 8.13431C2.52254 8.63965 2.65779 9.13371 2.89752 9.57905C2.476 9.92149 2.14454 10.3617 1.93197 10.8615C1.7194 11.3612 1.63215 11.9054 1.67782 12.4465C1.7235 12.9877 1.9007 13.5095 2.19403 13.9666C2.48735 14.4236 2.88791 14.8021 3.36085 15.069C3.30245 15.5209 3.3373 15.9799 3.46326 16.4178C3.58922 16.8557 3.8036 17.2631 4.09318 17.6148C4.38275 17.9666 4.74136 18.2553 5.14687 18.463C5.55238 18.6708 5.99617 18.7932 6.45083 18.8227C6.9055 18.8522 7.36139 18.7881 7.79034 18.6346C8.2193 18.481 8.61221 18.2411 8.94482 17.9297C9.27743 17.6183 9.54267 17.242 9.72416 16.8241C9.90565 16.4062 9.99953 15.9555 10 15.4999V4.66655Z"
-                      stroke="#7C3BED"
-                      strokeWidth="1.66667"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M10 4.66655C9.99903 4.33324 10.0647 4.0031 10.1932 3.69555C10.3217 3.38799 10.5103 3.10923 10.7481 2.87567C10.9859 2.6421 11.268 2.45844 11.5778 2.33549C11.8876 2.21254 12.2189 2.15278 12.5521 2.15972C12.8853 2.16667 13.2138 2.24018 13.5182 2.37593C13.8226 2.51169 14.0968 2.70694 14.3247 2.95022C14.5525 3.19349 14.7294 3.47987 14.845 3.79251C14.9605 4.10515 15.0124 4.43774 14.9975 4.77071C15.4873 4.89666 15.9421 5.13242 16.3273 5.46014C16.7125 5.78786 17.0181 6.19894 17.221 6.66225C17.4238 7.12556 17.5185 7.62896 17.498 8.13431C17.4775 8.63965 17.3422 9.13371 17.1025 9.57905C17.524 9.92149 17.8555 10.3617 18.0681 10.8615C18.2806 11.3612 18.3679 11.9054 18.3222 12.4465C18.2765 12.9877 18.0993 13.5095 17.806 13.9666C17.5127 14.4236 17.1121 14.8021 16.6392 15.069C16.6976 15.5209 16.6627 15.9799 16.5368 16.4178C16.4108 16.8557 16.1964 17.2631 15.9069 17.6148C15.6173 17.9666 15.2587 18.2553 14.8532 18.463C14.4477 18.6708 14.0039 18.7932 13.5492 18.8227C13.0945 18.8522 12.6386 18.7881 12.2097 18.6346C11.7807 18.481 11.3878 18.2411 11.0552 17.9297C10.7226 17.6183 10.4574 17.242 10.2759 16.8241C10.0944 16.4062 10.0005 15.9555 10 15.4999V4.66655Z"
-                      stroke="#7C3BED"
-                      strokeWidth="1.66667"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M12.5 11.3333C11.8004 11.0872 11.1894 10.6392 10.7444 10.0458C10.2994 9.45251 10.0404 8.74056 10 8C9.95962 8.74056 9.70056 9.45251 9.25556 10.0458C8.81057 10.6392 8.19963 11.0872 7.5 11.3333"
-                      stroke="#7C3BED"
-                      strokeWidth="1.66667"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M14.666 5.91659C14.8677 5.56707 14.9818 5.17393 14.9985 4.77075"
-                      stroke="#7C3BED"
-                      strokeWidth="1.66667"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M5.00244 4.77075C5.01892 5.17386 5.13272 5.567 5.33411 5.91659"
-                      stroke="#7C3BED"
-                      strokeWidth="1.66667"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M2.89746 9.58C3.04991 9.45584 3.21305 9.34541 3.38496 9.25"
-                      stroke="#7C3BED"
-                      strokeWidth="1.66667"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M16.6152 9.25C16.7871 9.34541 16.9503 9.45584 17.1027 9.58"
-                      stroke="#7C3BED"
-                      strokeWidth="1.66667"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M5.00001 15.5001C4.4257 15.5003 3.86106 15.3522 3.36084 15.0701"
-                      stroke="#7C3BED"
-                      strokeWidth="1.66667"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M16.6392 15.0701C16.1389 15.3522 15.5743 15.5003 15 15.5001"
-                      stroke="#7C3BED"
-                      strokeWidth="1.66667"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                  <span className="text-white text-[15px] font-medium leading-6">
-                    Personal hobby/interest
-                  </span>
-                </button>
-              </div>
+               <button
+  type="button"
+  onClick={() =>
+    setFormData({ ...formData, motivation: "hobby" })
+  }
+  className={`flex-1 flex items-center gap-3 p-4 rounded-xl border ${
+    formData.motivation === "hobby"
+      ? "border-[#0AEFC9] bg-[#CFC6FD]"
+      : "border-[#454953] bg-[#222328]"
+  } transition-colors`}
+>
+  <div className="flex-shrink-0 w-5 h-5 flex items-center justify-center">
+    <svg
+      width="20"
+      height="21"
+      viewBox="0 0 20 21"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className="w-full h-full"
+    >
+      <path
+        d="M10 4.66655C10.001 4.33324 9.93532 4.0031 9.80685 3.69555C9.67837 3.38799 9.4897 3.10923 9.25191 2.87567C9.01413 2.6421 8.73204 2.45844 8.42224 2.33549C8.11243 2.21254 7.78117 2.15278 7.44793 2.15972C7.1147 2.16667 6.78621 2.24018 6.4818 2.37593C6.17739 2.51169 5.9032 2.70694 5.67536 2.95022C5.44751 3.19349 5.27061 3.47987 5.15506 3.79251C5.03952 4.10515 4.98765 4.43774 5.00252 4.77071C4.51269 4.89666 4.05794 5.13242 3.67271 5.46014C3.28749 5.78786 2.98189 6.19894 2.77906 6.66225C2.57623 7.12556 2.48149 7.62896 2.50201 8.13431C2.52254 8.63965 2.65779 9.13371 2.89752 9.57905C2.476 9.92149 2.14454 10.3617 1.93197 10.8615C1.7194 11.3612 1.63215 11.9054 1.67782 12.4465C1.7235 12.9877 1.9007 13.5095 2.19403 13.9666C2.48735 14.4236 2.88791 14.8021 3.36085 15.069C3.30245 15.5209 3.3373 15.9799 3.46326 16.4178C3.58922 16.8557 3.8036 17.2631 4.09318 17.6148C4.38275 17.9666 4.74136 18.2553 5.14687 18.463C5.55238 18.6708 5.99617 18.7932 6.45083 18.8227C6.9055 18.8522 7.36139 18.7881 7.79034 18.6346C8.2193 18.481 8.61221 18.2411 8.94482 17.9297C9.27743 17.6183 9.54267 17.242 9.72416 16.8241C9.90565 16.4062 9.99953 15.9555 10 15.4999V4.66655Z"
+        stroke="#7C3BED"
+        strokeWidth="1.66667"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  </div>
+
+  <span className="text-white text-[14px] sm:text-[15px] font-medium leading-5 text-left break-words w-full">
+    Personal hobby / interest
+  </span>
+</button>
+</div>
 
               <button
                 type="button"
@@ -399,462 +347,237 @@ export default function CreateCourse() {
         );
 
       case 3:
-        return (
-          <div className="flex flex-col gap-7">
-            <div className="flex flex-col gap-1.5">
-              <h2 className="text-white text-[22px] font-bold leading-6 tracking-tight">
-                What's your current experience with this topic?
-              </h2>
-              <p className="text-[#6B7280] text-sm leading-5">
-                This helps us set the right complexity level
-              </p>
-            </div>
+  return (
+    <div className="flex flex-col gap-7">
+      <div className="flex flex-col gap-1.5">
+        <h2 className="text-white text-[22px] font-bold leading-6 tracking-tight">
+          What's your current experience with this topic?
+        </h2>
+        <p className="text-[#6B7280] text-sm leading-5">
+          This helps us set the right complexity level
+        </p>
+      </div>
 
-            <div className="flex flex-col gap-4">
-              <button
-                type="button"
-                onClick={() =>
-                  setFormData({ ...formData, experienceLevel: "beginner" })
-                }
-                className={`flex items-center justify-between p-6 rounded-2xl border ${
-                  formData.experienceLevel === "beginner"
-                    ? "border-[#0AEFC9]"
-                    : "border-transparent"
-                } bg-[#222328] transition-colors`}
+      <div className="flex flex-col gap-4">
+        {[
+          {
+            key: "beginner",
+            title: "Beginner",
+            desc: "Perfect for complete beginners. We'll start with the basics and build up gradually.",
+          },
+          {
+            key: "intermediate",
+            title: "Intermediate",
+            desc: "Great! We'll skip the fundamentals and focus on intermediate concepts.",
+          },
+          {
+            key: "advanced",
+            title: "Advanced",
+            desc: "Excellent! We'll dive into advanced topics and expert-level techniques.",
+          },
+        ].map((level) => {
+          const isActive = formData.experienceLevel === level.key;
+          return (
+            <button
+              key={level.key}
+              type="button"
+              onClick={() =>
+                setFormData({ ...formData, experienceLevel: level.key })
+              }
+              className={`flex items-center justify-between p-6 rounded-2xl border-[1.5px] ${
+                isActive
+                  ? "border-[#0AEFC9] bg-[#222328]"
+                  : "border-[#33363E] bg-[#222328]"
+              } transition-all duration-200 hover:border-[#0AEFC9]/70`}
+            >
+              <div className="flex items-start gap-3 pr-2 text-left">
+                {/* Keep your SVG icons here */}
+                <div className="flex flex-col items-start gap-1.5">
+                  <h3 className="text-white text-[20px] sm:text-[22px] font-bold leading-6 tracking-tight">
+                    {level.title}
+                  </h3>
+                  <p className="text-[#6B7280] text-sm leading-5">{level.desc}</p>
+                </div>
+              </div>
+
+              {/* Checkbox (consistent size, fixed spacing, no jump) */}
+              <div
+                className={`flex items-center justify-center w-[22px] h-[22px] sm:w-[20px] sm:h-[20px] rounded border-[1.5px] shrink-0 ml-2 ${
+                  isActive
+                    ? "border-[#0AEFC9] bg-[#0AEFC9]"
+                    : "border-[#0AEFC9] bg-transparent"
+                }`}
               >
-                <div className="flex items-start gap-2">
+                {isActive && (
                   <svg
-                    width="24"
-                    height="25"
-                    viewBox="0 0 24 25"
+                    width="14"
+                    height="14"
+                    viewBox="0 0 12 13"
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
+                    className="pointer-events-none"
                   >
                     <path
-                      opacity="0.4"
-                      d="M16.1701 10.8101H7.83007C6.65007 10.8101 6.24007 10.0201 6.93007 9.06007L11.1001 3.22007C11.5901 2.52007 12.4101 2.52007 12.9001 3.22007L17.0701 9.06007C17.7601 10.0201 17.3501 10.8101 16.1701 10.8101Z"
-                      fill="#10FF08"
-                    />
-                    <path
-                      d="M17.5901 18.7501H6.41009C4.83009 18.7501 4.29009 17.7001 5.22009 16.4201L9.21008 10.8101H14.7901L18.7801 16.4201C19.7101 17.7001 19.1701 18.7501 17.5901 18.7501Z"
-                      fill="#10FF08"
-                    />
-                    <path
-                      d="M12.75 18.75V22.75C12.75 23.16 12.41 23.5 12 23.5C11.59 23.5 11.25 23.16 11.25 22.75V18.75H12.75Z"
-                      fill="#10FF08"
+                      d="M10 3.75L4.5 9.25L2 6.75"
+                      stroke="white"
+                      strokeWidth="1.4"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
                     />
                   </svg>
-                  <div className="flex flex-col items-start gap-1.5">
-                    <h3 className="text-white text-[22px] font-bold leading-6 tracking-tight">
-                      Beginner
-                    </h3>
-                    <p className="text-[#6B7280] text-sm leading-5">
-                      Perfect for complete beginners. We'll start with the basics and build up gradually.
-                    </p>
-                  </div>
-                </div>
-                <div
-                  className={`w-[18px] h-[18px] rounded border-[1.5px] ${
-                    formData.experienceLevel === "beginner"
-                      ? "border-[#0AEFC9] bg-[#0AEFC9]"
-                      : "border-[#0AEFC9]"
-                  }`}
-                >
-                  {formData.experienceLevel === "beginner" && (
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 12 13"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M10 3.75L4.5 9.25L2 6.75"
-                        stroke="white"
-                        strokeWidth="1.4"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  )}
-                </div>
-              </button>
+                )}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
 
-              <button
-                type="button"
-                onClick={() =>
-                  setFormData({ ...formData, experienceLevel: "intermediate" })
-                }
-                className={`flex items-center justify-between p-6 rounded-2xl border ${
-                  formData.experienceLevel === "intermediate"
-                    ? "border-[#0AEFC9]"
-                    : "border-transparent"
-                } bg-[#222328] transition-colors`}
-              >
-                <div className="flex items-start gap-2">
-                  <svg
-                    width="24"
-                    height="25"
-                    viewBox="0 0 24 25"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      opacity="0.4"
-                      d="M12 22.75C17.5228 22.75 22 18.2728 22 12.75C22 7.22715 17.5228 2.75 12 2.75C6.47715 2.75 2 7.22715 2 12.75C2 18.2728 6.47715 22.75 12 22.75Z"
-                      fill="#0AEFC9"
-                    />
-                    <path
-                      d="M9.1001 12.75V11.27C9.1001 9.35999 10.4501 8.58999 12.1001 9.53999L13.3801 10.28L14.6601 11.02C16.3101 11.97 16.3101 13.53 14.6601 14.48L13.3801 15.22L12.1001 15.96C10.4501 16.91 9.1001 16.13 9.1001 14.23V12.75Z"
-                      fill="#0AEFC9"
-                    />
-                  </svg>
-                  <div className="flex flex-col items-start gap-1.5">
-                    <h3 className="text-white text-[22px] font-bold leading-6 tracking-tight">
-                      Intermediate
-                    </h3>
-                    <p className="text-[#6B7280] text-sm leading-5">
-                      Great! We'll skip the fundamentals and focus on intermediate concepts.
-                    </p>
-                  </div>
-                </div>
-                <div
-                  className={`w-[18px] h-[18px] rounded border-[1.5px] ${
-                    formData.experienceLevel === "intermediate"
-                      ? "border-[#0AEFC9] bg-[#0AEFC9]"
-                      : "border-[#0AEFC9]"
-                  }`}
-                >
-                  {formData.experienceLevel === "intermediate" && (
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 12 13"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M10 3.75L4.5 9.25L2 6.75"
-                        stroke="white"
-                        strokeWidth="1.4"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  )}
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() =>
-                  setFormData({ ...formData, experienceLevel: "advanced" })
-                }
-                className={`flex items-center justify-between p-6 rounded-2xl border ${
-                  formData.experienceLevel === "advanced"
-                    ? "border-[#0AEFC9]"
-                    : "border-transparent"
-                } bg-[#222328] transition-colors`}
-              >
-                <div className="flex items-start gap-2">
-                  <svg
-                    width="24"
-                    height="25"
-                    viewBox="0 0 24 25"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      opacity="0.4"
-                      d="M12 22.75C17.5228 22.75 22 18.2728 22 12.75C22 7.22715 17.5228 2.75 12 2.75C6.47715 2.75 2 7.22715 2 12.75C2 18.2728 6.47715 22.75 12 22.75Z"
-                      fill="#0AEFC9"
-                    />
-                    <path
-                      d="M9.1001 12.75V11.27C9.1001 9.35999 10.4501 8.58999 12.1001 9.53999L13.3801 10.28L14.6601 11.02C16.3101 11.97 16.3101 13.53 14.6601 14.48L13.3801 15.22L12.1001 15.96C10.4501 16.91 9.1001 16.13 9.1001 14.23V12.75Z"
-                      fill="#0AEFC9"
-                    />
-                  </svg>
-                  <div className="flex flex-col items-start gap-1.5">
-                    <h3 className="text-white text-[22px] font-bold leading-6 tracking-tight">
-                      Advanced
-                    </h3>
-                    <p className="text-[#6B7280] text-sm leading-5">
-                      Excellent! We'll dive into advanced topics and expert-level techniques.
-                    </p>
-                  </div>
-                </div>
-                <div
-                  className={`w-[18px] h-[18px] rounded border-[1.5px] ${
-                    formData.experienceLevel === "advanced"
-                      ? "border-[#0AEFC9] bg-[#0AEFC9]"
-                      : "border-[#0AEFC9]"
-                  }`}
-                >
-                  {formData.experienceLevel === "advanced" && (
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 12 13"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M10 3.75L4.5 9.25L2 6.75"
-                        stroke="white"
-                        strokeWidth="1.4"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  )}
-                </div>
-              </button>
-            </div>
-          </div>
-        );
 
       case 4:
-        return (
-          <div className="flex flex-col gap-7">
-            <div className="flex flex-col gap-1.5">
-              <h2 className="text-white text-[22px] font-bold leading-6 tracking-tight">
-                Language & Teaching Style
-              </h2>
-              <p className="text-[#6B7280] text-sm leading-5">
-                Choose your preferred language and tutor personality
-              </p>
-            </div>
+  return (
+    <div className="flex flex-col gap-7 max-h-[85vh] overflow-y-auto px-2 sm:px-4 pb-6 scroll-smooth">
+      <div className="flex flex-col gap-1.5">
+        <h2 className="text-white text-[22px] sm:text-[24px] font-bold leading-6 tracking-tight">
+          Language & Teaching Style
+        </h2>
+        <p className="text-[#6B7280] text-sm sm:text-base leading-5">
+          Choose your preferred language and tutor personality
+        </p>
+      </div>
 
-            <div className="flex flex-col gap-2">
-              <label className="text-white text-sm font-medium">Select Language</label>
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Language"
-                  value={formData.language}
-                  onChange={(e) =>
-                    setFormData({ ...formData, language: e.target.value })
-                  }
-                  className="w-full h-[50px] px-4 rounded-xl border border-[#DBDBDC] bg-white text-base text-[#AAAAAD] placeholder:text-[#AAAAAD] focus:outline-none focus:ring-2 focus:ring-[#7C3BED]"
-                />
-                <svg
-                  className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none"
-                  width="20"
-                  height="21"
-                  viewBox="0 0 20 21"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M5 8.25L10 13.25L15 8.25"
-                    stroke="#999999"
-                    strokeWidth="1.4"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+      {/* Language input */}
+      <div className="flex flex-col gap-2">
+        <label className="text-white text-sm sm:text-base font-medium">
+          Select Language
+        </label>
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Language"
+            value={formData.language || ""}
+            onChange={(e) =>
+              setFormData({ ...formData, language: e.target.value })
+            }
+            className="w-full h-[50px] px-4 rounded-xl border border-[#DBDBDC] bg-white text-base text-[#AAAAAD] placeholder:text-[#AAAAAD] focus:outline-none focus:ring-2 focus:ring-[#7C3BED]"
+          />
+          <svg
+            className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none"
+            width="20"
+            height="21"
+            viewBox="0 0 20 21"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M5 8.25L10 13.25L15 8.25"
+              stroke="#999999"
+              strokeWidth="1.4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </div>
+      </div>
+
+      {/* Teaching style options */}
+      <div className="flex flex-col gap-4">
+        {[
+          {
+            key: "casual",
+            title: "Casual & Friendly",
+            lines: [
+              "Relaxed, conversational, and encouraging.",
+              `"Hey! Let's dive into this topic together. Don't worry if it seems tricky at first!"`,
+            ],
+          },
+          {
+            key: "professional",
+            title: "Professional & Academic",
+            lines: [
+              "Formal, structured, and comprehensive.",
+              `"Today we will examine the fundamental principles underlying this concept."`,
+            ],
+          },
+          {
+            key: "exam",
+            title: "Exam-Focused",
+            lines: [
+              "Direct, test-oriented, and results-driven.",
+              `"This is a key exam topic. Remember this formula - it appears frequently in tests."`,
+            ],
+          },
+          {
+            key: "storytelling",
+            title: "Storytelling & Analogies",
+            lines: [
+              "Creative explanations with real-world examples.",
+              `"Think of this concept like a recipe - each ingredient plays a specific role..."`,
+            ],
+          },
+        ].map((style) => {
+          const isActive = formData.teachingStyle === style.key;
+          return (
+            <button
+              key={style.key}
+              type="button"
+              onClick={() =>
+                setFormData({ ...formData, teachingStyle: style.key })
+              }
+              className={`flex items-start justify-between w-full p-5 sm:p-6 rounded-2xl border-[1.5px] ${
+                isActive
+                  ? "border-[#0AEFC9] bg-[#222328]"
+                  : "border-[#33363E] bg-[#222328]"
+              } transition-all duration-200 hover:border-[#0AEFC9]/70`}
+            >
+              <div className="flex flex-col items-start gap-1 text-left flex-1 pr-3">
+                <h3 className="text-white text-[18px] sm:text-[22px] font-semibold sm:font-bold leading-snug break-words">
+                  {style.title}
+                </h3>
+                {style.lines.map((l, i) => (
+                  <p
+                    key={i}
+                    className="text-[#B6B8C0] text-xs sm:text-sm leading-5 break-words"
+                  >
+                    {l}
+                  </p>
+                ))}
               </div>
-            </div>
 
-            <div className="flex flex-col gap-4">
-              <button
-                type="button"
-                onClick={() =>
-                  setFormData({ ...formData, teachingStyle: "casual" })
-                }
-                className={`flex items-center justify-between p-6 rounded-2xl border ${
-                  formData.teachingStyle === "casual"
-                    ? "border-[#0AEFC9]"
-                    : "border-transparent"
-                } bg-[#222328] transition-colors`}
+              {/* Checkbox — consistent size & spacing */}
+              <div
+                className={`flex items-center justify-center w-[22px] h-[22px] sm:w-[20px] sm:h-[20px] rounded border-[1.5px] shrink-0 ml-3 ${
+                  isActive
+                    ? "border-[#0AEFC9] bg-[#0AEFC9]"
+                    : "border-[#0AEFC9] bg-transparent"
+                }`}
               >
-                <div className="flex flex-col items-start gap-1.5">
-                  <h3 className="text-white text-[22px] font-bold leading-6 tracking-tight">
-                    Casual & Friendly
-                  </h3>
-                  <p className="text-[#B6B8C0] text-sm leading-5">
-                    Relaxed, conversational, and encouraging
-                  </p>
-                  <p className="text-[#B6B8C0] text-sm leading-5">
-                    "Hey! Let's dive into this topic together. Don't worry if it seems tricky at first!"
-                  </p>
-                </div>
-                <div
-                  className={`w-[18px] h-[18px] rounded border-[1.5px] ${
-                    formData.teachingStyle === "casual"
-                      ? "border-[#0AEFC9] bg-[#0AEFC9]"
-                      : "border-[#0AEFC9]"
-                  }`}
-                >
-                  {formData.teachingStyle === "casual" && (
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 12 13"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M10 3.75L4.5 9.25L2 6.75"
-                        stroke="white"
-                        strokeWidth="1.4"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  )}
-                </div>
-              </button>
+                {isActive && (
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 12 13"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M10 3.75L4.5 9.25L2 6.75"
+                      stroke="white"
+                      strokeWidth="1.4"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                )}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
 
-              <button
-                type="button"
-                onClick={() =>
-                  setFormData({ ...formData, teachingStyle: "professional" })
-                }
-                className={`flex items-center justify-between p-6 rounded-2xl border ${
-                  formData.teachingStyle === "professional"
-                    ? "border-[#0AEFC9]"
-                    : "border-transparent"
-                } bg-[#222328] transition-colors`}
-              >
-                <div className="flex flex-col items-start gap-1.5">
-                  <h3 className="text-white text-[22px] font-bold leading-6 tracking-tight">
-                    Professional & Academic
-                  </h3>
-                  <p className="text-[#B6B8C0] text-sm leading-5">
-                    Formal, structured, and comprehensive
-                  </p>
-                  <p className="text-[#B6B8C0] text-sm leading-5">
-                    "Today we will examine the fundamental principles underlying this concept."
-                  </p>
-                </div>
-                <div
-                  className={`w-[18px] h-[18px] rounded border-[1.5px] ${
-                    formData.teachingStyle === "professional"
-                      ? "border-[#0AEFC9] bg-[#0AEFC9]"
-                      : "border-[#0AEFC9]"
-                  }`}
-                >
-                  {formData.teachingStyle === "professional" && (
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 12 13"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M10 3.75L4.5 9.25L2 6.75"
-                        stroke="white"
-                        strokeWidth="1.4"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  )}
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() =>
-                  setFormData({ ...formData, teachingStyle: "exam" })
-                }
-                className={`flex items-center justify-between p-6 rounded-2xl border ${
-                  formData.teachingStyle === "exam"
-                    ? "border-[#0AEFC9]"
-                    : "border-transparent"
-                } bg-[#222328] transition-colors`}
-              >
-                <div className="flex flex-col items-start gap-1.5">
-                  <h3 className="text-white text-[22px] font-bold leading-6 tracking-tight">
-                    Exam-Focused
-                  </h3>
-                  <p className="text-[#B6B8C0] text-sm leading-5">
-                    Direct, test-oriented, and results-driven
-                  </p>
-                  <p className="text-[#B6B8C0] text-sm leading-5">
-                    "This is a key exam topic. Remember this formula - it appears frequently in tests."
-                  </p>
-                </div>
-                <div
-                  className={`w-[18px] h-[18px] rounded border-[1.5px] ${
-                    formData.teachingStyle === "exam"
-                      ? "border-[#0AEFC9] bg-[#0AEFC9]"
-                      : "border-[#0AEFC9]"
-                  }`}
-                >
-                  {formData.teachingStyle === "exam" && (
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 12 13"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M10 3.75L4.5 9.25L2 6.75"
-                        stroke="white"
-                        strokeWidth="1.4"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  )}
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() =>
-                  setFormData({ ...formData, teachingStyle: "storytelling" })
-                }
-                className={`flex items-center justify-between p-6 rounded-2xl border ${
-                  formData.teachingStyle === "storytelling"
-                    ? "border-[#0AEFC9]"
-                    : "border-transparent"
-                } bg-[#222328] transition-colors`}
-              >
-                <div className="flex flex-col items-start gap-1.5">
-                  <h3 className="text-white text-[22px] font-bold leading-6 tracking-tight">
-                    Storytelling & Analogies
-                  </h3>
-                  <p className="text-[#B6B8C0] text-sm leading-5">
-                    Creative explanations with real-world examples
-                  </p>
-                  <p className="text-[#B6B8C0] text-sm leading-5">
-                    "Think of this concept like a recipe - each ingredient plays a specific role..."
-                  </p>
-                </div>
-                <div
-                  className={`w-[18px] h-[18px] rounded border-[1.5px] ${
-                    formData.teachingStyle === "storytelling"
-                      ? "border-[#0AEFC9] bg-[#0AEFC9]"
-                      : "border-[#0AEFC9]"
-                  }`}
-                >
-                  {formData.teachingStyle === "storytelling" && (
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 12 13"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M10 3.75L4.5 9.25L2 6.75"
-                        stroke="white"
-                        strokeWidth="1.4"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  )}
-                </div>
-              </button>
-            </div>
-          </div>
-        );
 
       case 5:
         return (
@@ -1615,7 +1338,6 @@ export default function CreateCourse() {
                   )}
                 </div>
               </button>
-
               <button
                 type="button"
                 onClick={() =>
@@ -1736,22 +1458,22 @@ export default function CreateCourse() {
                   </h2>
                   <p className="text-[#6B7280] text-[17px]">AI-Generated Course Preview</p>
                 </div>
-                <span className="px-3 py-1 rounded-full bg-[#DCFCE7] text-[#166534] text-xs font-semibold">
+                <span className="px-3 py-1 rounded-full bg-[#DCFCE7] text-[#166534] text-xs sm:text-sm font-semibold whitespace-nowrap">
                   Ready to Launch
                 </span>
               </div>
 
               <div className="flex items-center justify-around mb-6">
                 <div className="text-center">
-                  <div className="text-[#7C3BED] text-[23px] font-bold">4 weeks</div>
+                  <div className="text-[#7C3BED] text-[15px] font-bold">4 weeks</div>
                   <div className="text-[#6B7280] text-sm">Estimated Duration</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-[#7C3BED] text-[23px] font-bold">6 lessons</div>
+                  <div className="text-[#7C3BED] text-[15px] font-bold">6 lessons</div>
                   <div className="text-[#6B7280] text-sm">Total Lessons</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-[#7C3BED] text-[23px] font-bold">2h</div>
+                  <div className="text-[#7C3BED] text-[15px] font-bold">2h</div>
                   <div className="text-[#6B7280] text-sm">Per Session</div>
                 </div>
               </div>
@@ -2388,99 +2110,101 @@ export default function CreateCourse() {
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-[135px] py-4 sm:py-8 lg:py-0 flex items-center justify-center">
-          <div className="w-full max-w-[915px] flex flex-col gap-5">
-            <div className="text-center">
-              <h1 className="text-white text-2xl sm:text-[28px] font-bold leading-9 tracking-tight mb-2">
-                Create a Course
-              </h1>
-              <p className="text-[#6B7280] text-sm sm:text-[15px] leading-6">
-                Create a course tailored to your need
-              </p>
-            </div>
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-[135px] py-6 sm:py-8 flex items-start justify-center min-h-[100vh]">
+  <div className="w-full max-w-[915px] flex flex-col gap-5">
+    <div className="text-center px-2 sm:px-0">
+      <h1 className="text-white text-[22px] sm:text-[26px] lg:text-[28px] font-bold leading-tight tracking-tight mb-2 break-words">
+        Create a Course
+      </h1>
+      <p className="text-[#6B7280] text-sm sm:text-[15px] leading-6 break-words">
+        Create a course tailored to your need
+      </p>
+    </div>
 
-            <div className="flex flex-col gap-6">
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center justify-between text-white text-base leading-none tracking-tight">
-                  <span>Step {currentStep} of {totalSteps}</span>
-                  <span>{progressPercentage}% Complete</span>
-                </div>
-                <div className="h-2 rounded-full bg-[#F1F5F9] overflow-hidden">
-                  <div
-                    className="h-full bg-[#7C3BED] transition-all duration-300"
-                    style={{ width: `${progressPercentage}%` }}
-                  />
-                </div>
-              </div>
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between text-white text-sm sm:text-base leading-none tracking-tight flex-wrap">
+          <span>Step {currentStep} of {totalSteps}</span>
+          <span>{progressPercentage}% Complete</span>
+        </div>
+        <div className="h-2 rounded-full bg-[#F1F5F9] overflow-hidden">
+          <div
+            className="h-full bg-[#7C3BED] transition-all duration-300"
+            style={{ width: `${progressPercentage}%` }}
+          />
+        </div>
+      </div>
 
-              <div className="rounded-xl border border-[#696E7E] bg-[#101113] p-4 sm:p-6 shadow-sm">
-                {renderStepContent()}
 
-                {currentStep !== 8 && (
-                  <div className="flex items-center justify-between mt-7">
-                    <button
-                      type="button"
-                      onClick={handleBack}
-                      disabled={currentStep === 1}
-                      className="flex items-center gap-4 px-7 py-4 rounded-lg border border-[#454953] bg-[#33363E] text-white transition-colors hover:bg-[#454953] disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 16 16"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M8 12.6666L3.33333 7.99992L8 3.33325"
-                          stroke="white"
-                          strokeWidth="1.33333"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M12.6667 8H3.33333"
-                          stroke="white"
-                          strokeWidth="1.33333"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                      <span className="text-sm font-medium">Back</span>
-                    </button>
+              <div className="rounded-xl border border-[#696E7E] bg-[#101113] p-4 sm:p-6 shadow-sm mb-16">
+  {renderStepContent()}
 
-                    <button
-                      type="button"
-                      onClick={handleNext}
-                      className="flex items-center gap-4 px-4 py-3 rounded-lg bg-[#7C3BED] text-white shadow-[0_10px_40px_-10px_rgba(124,59,237,0.2)] transition-colors hover:bg-[#6935D1]"
-                    >
-                      <span className="text-sm font-medium">Next</span>
-                      <svg
-                        width="17"
-                        height="16"
-                        viewBox="0 0 17 16"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M3.77808 8H13.1114"
-                          stroke="white"
-                          strokeWidth="1.33333"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M8.44482 3.33325L13.1115 7.99992L8.44482 12.6666"
-                          stroke="white"
-                          strokeWidth="1.33333"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                )}
-              </div>
+  {currentStep !== 8 && (
+    <div className="flex items-center justify-between mt-7">
+      <button
+        type="button"
+        onClick={handleBack}
+        disabled={currentStep === 1}
+        className="flex items-center gap-4 px-7 py-4 rounded-lg border border-[#454953] bg-[#33363E] text-white transition-colors hover:bg-[#454953] disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 16 16"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M8 12.6666L3.33333 7.99992L8 3.33325"
+            stroke="white"
+            strokeWidth="1.33333"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M12.6667 8H3.33333"
+            stroke="white"
+            strokeWidth="1.33333"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+        <span className="text-sm font-medium">Back</span>
+      </button>
+
+      <button
+        type="button"
+        onClick={handleNext}
+        className="flex items-center gap-4 px-4 py-3 rounded-lg bg-[#7C3BED] text-white shadow-[0_10px_40px_-10px_rgba(124,59,237,0.2)] transition-colors hover:bg-[#6935D1]"
+      >
+        <span className="text-sm font-medium">Next</span>
+        <svg
+          width="17"
+          height="16"
+          viewBox="0 0 17 16"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M3.77808 8H13.1114"
+            stroke="white"
+            strokeWidth="1.33333"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M8.44482 3.33325L13.1115 7.99992L8.44482 12.6666"
+            stroke="white"
+            strokeWidth="1.33333"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
+    </div>
+  )}
+</div>
+
             </div>
           </div>
         </div>
