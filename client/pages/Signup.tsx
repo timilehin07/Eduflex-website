@@ -21,7 +21,7 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-screen w-full flex bg-white font-host">
+    <div className="min-h-screen w-full flex bg-white font-host overflow-x-hidden sm:overflow-x-visible">
       <div className="w-full lg:w-1/2 bg-brand-dark relative flex items-center justify-center p-6 sm:p-8 lg:p-12">
         <div
           className="absolute top-0 left-0 w-[793px] h-[793px] rounded-full opacity-20 -translate-x-[290px] -translate-y-[239px]"
@@ -119,38 +119,40 @@ export default function Signup() {
                 </div>
 
                 <div className="flex flex-col gap-[15px]">
-                  <div className="flex items-start gap-2">
-                    <div className="flex-1 flex flex-col gap-1">
-                      <label
-                        htmlFor="firstName"
-                        className="text-[#33363E] font-host text-sm font-medium leading-[160%]"
-                      >
-                        First Name
-                      </label>
-                      <input
-                        id="firstName"
-                        type="text"
-                        placeholder="First Name"
-                        className="flex px-3 py-[13px] items-center rounded-[10px] border border-[#E2E4E9] bg-white shadow-[0_1px_2px_0_rgba(228,229,231,0.24)] text-[#98A2B3] font-host text-sm font-normal leading-[160%] outline-none placeholder:text-[#98A2B3]"
-                        required
-                      />
-                    </div>
-                    <div className="flex-1 flex flex-col gap-1">
-                      <label
-                        htmlFor="lastName"
-                        className="text-[#33363E] font-host text-sm font-medium leading-[160%]"
-                      >
-                        Last Name
-                      </label>
-                      <input
-                        id="lastName"
-                        type="text"
-                        placeholder="Last Name"
-                        className="flex px-3 py-[13px] items-center rounded-[10px] border border-[#E2E4E9] bg-white shadow-[0_1px_2px_0_rgba(228,229,231,0.24)] text-[#98A2B3] font-host text-sm font-normal leading-[160%] outline-none placeholder:text-[#98A2B3]"
-                        required
-                      />
-                    </div>
-                  </div>
+                  <div className="flex items-start gap-2 flex-wrap">
+  <div className="flex-1 flex flex-col gap-1 min-w-0">
+    <label
+      htmlFor="firstName"
+      className="text-[#33363E] font-host text-sm font-medium leading-[160%]"
+    >
+      First Name
+    </label>
+    <input
+      id="firstName"
+      type="text"
+      placeholder="First Name"
+      className="w-full px-3 py-[13px] rounded-[10px] border border-[#E2E4E9] bg-white shadow-[0_1px_2px_0_rgba(228,229,231,0.24)] text-[#98A2B3] font-host text-sm font-normal leading-[160%] outline-none placeholder:text-[#98A2B3]"
+      required
+    />
+  </div>
+
+  <div className="flex-1 flex flex-col gap-1 min-w-0">
+    <label
+      htmlFor="lastName"
+      className="text-[#33363E] font-host text-sm font-medium leading-[160%]"
+    >
+      Last Name
+    </label>
+    <input
+      id="lastName"
+      type="text"
+      placeholder="Last Name"
+      className="w-full px-3 py-[13px] rounded-[10px] border border-[#E2E4E9] bg-white shadow-[0_1px_2px_0_rgba(228,229,231,0.24)] text-[#98A2B3] font-host text-sm font-normal leading-[160%] outline-none placeholder:text-[#98A2B3]"
+      required
+    />
+  </div>
+</div>
+
 
                   <div className="flex flex-col gap-1">
                     <label
@@ -315,68 +317,73 @@ export default function Signup() {
                   </div>
 
                   <div className="flex flex-col gap-1">
-                    <label
-                      htmlFor="mobile"
-                      className="text-[#090909] font-host text-sm font-medium leading-normal tracking-[-0.28px]"
-                    >
-                      Mobile Number
-                    </label>
-                    <div className="flex items-start gap-1.5">
-                      <div className="flex px-2 py-[15px] flex-col items-center justify-center gap-2.5 rounded-[10px] border border-[#E5E5E6] bg-white">
-                        <div className="flex h-[18px] items-center gap-1">
-                          <svg
-                            className="w-4 h-4"
-                            viewBox="0 0 16 16"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <g clipPath="url(#clip0_36_10422)">
-                              <path
-                                d="M8 16C12.4183 16 16 12.4183 16 8C16 3.58172 12.4183 0 8 0C3.58172 0 0 3.58172 0 8C0 12.4183 3.58172 16 8 16Z"
-                                fill="#F0F0F0"
-                              />
-                              <path
-                                d="M0 7.99993C0 11.4397 2.171 14.372 5.21741 15.5024V0.497559C2.171 1.62787 0 4.56025 0 7.99993Z"
-                                fill="#6DA544"
-                              />
-                              <path
-                                d="M15.9996 7.99993C15.9996 4.56025 13.8286 1.62787 10.7822 0.497559V15.5024C13.8286 14.372 15.9996 11.4397 15.9996 7.99993Z"
-                                fill="#6DA544"
-                              />
-                            </g>
-                            <defs>
-                              <clipPath id="clip0_36_10422">
-                                <rect width="16" height="16" fill="white" />
-                              </clipPath>
-                            </defs>
-                          </svg>
-                          <span className="text-[#AAAAAD] font-['Inter'] text-base font-normal tracking-[-0.32px]">
-                            +234
-                          </span>
-                          <svg
-                            className="w-4 h-4"
-                            viewBox="0 0 16 16"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path
-                              d="M4 6L8 10L12 6"
-                              stroke="#00000A"
-                              strokeWidth="1.2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                        </div>
-                      </div>
-                      <input
-                        id="mobile"
-                        type="tel"
-                        placeholder="0000 000 000"
-                        className="flex-1 flex px-4 py-[15px] flex-col items-start justify-center gap-2.5 rounded-[10px] border border-[#DBDBDC] bg-white text-[#AAAAAD] font-['Inter'] text-base font-normal tracking-[-0.32px] outline-none placeholder:text-[#AAAAAD]"
-                      />
-                    </div>
-                  </div>
+  <label
+    htmlFor="mobile"
+    className="text-[#090909] font-host text-sm font-medium leading-normal tracking-[-0.28px]"
+  >
+    Mobile Number
+  </label>
+
+  <div className="flex items-start gap-1.5 flex-wrap sm:flex-nowrap">
+    <div className="flex px-2 py-[15px] flex-col items-center justify-center gap-2.5 rounded-[10px] border border-[#E5E5E6] bg-white min-w-[70px] sm:min-w-[90px]">
+      <div className="flex h-[18px] items-center gap-1">
+        <svg
+          className="w-4 h-4"
+          viewBox="0 0 16 16"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <g clipPath="url(#clip0_36_10422)">
+            <path
+              d="M8 16C12.4183 16 16 12.4183 16 8C16 3.58172 12.4183 0 8 0C3.58172 0 0 3.58172 0 8C0 12.4183 3.58172 16 8 16Z"
+              fill="#F0F0F0"
+            />
+            <path
+              d="M0 7.99993C0 11.4397 2.171 14.372 5.21741 15.5024V0.497559C2.171 1.62787 0 4.56025 0 7.99993Z"
+              fill="#6DA544"
+            />
+            <path
+              d="M15.9996 7.99993C15.9996 4.56025 13.8286 1.62787 10.7822 0.497559V15.5024C13.8286 14.372 15.9996 11.4397 15.9996 7.99993Z"
+              fill="#6DA544"
+            />
+          </g>
+          <defs>
+            <clipPath id="clip0_36_10422">
+              <rect width="16" height="16" fill="white" />
+            </clipPath>
+          </defs>
+        </svg>
+
+        <span className="text-[#AAAAAD] font-['Inter'] text-base font-normal tracking-[-0.32px]">
+          +234
+        </span>
+
+        <svg
+          className="w-4 h-4"
+          viewBox="0 0 16 16"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M4 6L8 10L12 6"
+            stroke="#00000A"
+            strokeWidth="1.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </div>
+    </div>
+
+    <input
+      id="mobile"
+      type="tel"
+      placeholder="0000 000 000"
+      className="flex-1 min-w-0 w-full px-4 py-[15px] flex-col items-start justify-center gap-2.5 rounded-[10px] border border-[#DBDBDC] bg-white text-[#AAAAAD] font-['Inter'] text-base font-normal tracking-[-0.32px] outline-none placeholder:text-[#AAAAAD]"
+    />
+  </div>
+</div>
+
                 </div>
               </div>
             </div>
