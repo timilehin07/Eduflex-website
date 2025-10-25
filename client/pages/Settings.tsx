@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Sidebar from "@/components/Sidebar";
 
 const settingsRows = [
@@ -33,19 +33,138 @@ const colors = [
   { id: 5, color: "#32ADE6", label: "Cyan" },
 ];
 
+const modules = [
+  { id: 1, title: "Introduction to AI", completed: true },
+  { id: 2, title: "Machine Learning Basics", completed: true },
+  { id: 3, title: "Neural Networks", completed: false, active: true },
+  { id: 4, title: "Prompt Engineering", completed: false },
+  { id: 5, title: "Final Assessment", completed: false },
+];
+
 export default function Settings() {
   const [selectedColor, setSelectedColor] = useState(colors[0].color);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [messages, setMessages] = useState([
+    { id: 1, type: "ai", text: "Hello! I'm your AI learning assistant. How can I help you today?" }
+  ]);
+  const [inputText, setInputText] = useState("");
+  const [isRecording, setIsRecording] = useState(false);
+  const [selectedModule, setSelectedModule] = useState(3);
+  const [videoPlaying, setVideoPlaying] = useState(false);
+  const [showVoiceCloningModal, setShowVoiceCloningModal] = useState(false);
+  const [showAvatarModal, setShowAvatarModal] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState("English");
+  const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
+  const fileInputRef = useRef(null);
+  const videoRef = useRef(null);
+
+  const languages = [
+    "English", "Spanish", "French", "German", "Chinese", 
+    "Japanese", "Korean", "Arabic", "Portuguese", "Russian"
+  ];
+
+  const handleSendMessage = () => {
+    if (inputText.trim()) {
+      const userMessage = { id: Date.now(), type: "user", text: inputText };
+      setMessages([...messages, userMessage]);
+      setInputText("");
+      
+      setTimeout(() => {
+        const aiResponse = { 
+          id: Date.now() + 1, 
+          type: "ai", 
+          text: `I understand you said: "${inputText}". Let me help you with that topic. This is a detailed explanation that covers the key concepts you need to know.` 
+        };
+        setMessages(prev => [...prev, aiResponse]);
+      }, 1000);
+    }
+  };
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const fileMessage = { 
+        id: Date.now(), 
+        type: "user", 
+        text: `Uploaded document: ${file.name}`,
+        isFile: true 
+      };
+      setMessages([...messages, fileMessage]);
+      
+      setTimeout(() => {
+        const aiResponse = { 
+          id: Date.now() + 1, 
+          type: "ai", 
+          text: `I've received your document "${file.name}". I'll analyze it and provide insights based on its content.` 
+        };
+        setMessages(prev => [...prev, aiResponse]);
+      }, 1000);
+    }
+  };
+
+  const handleVoiceRecord = () => {
+    if (!isRecording) {
+      setIsRecording(true);
+      setTimeout(() => {
+        const transcribedText = "This is a sample transcribed text from your voice recording";
+        setInputText(transcribedText);
+        setIsRecording(false);
+      }, 3000);
+    } else {
+      setIsRecording(false);
+    }
+  };
+
+  const handleGenerateVideo = (text) => {
+    alert(`Generating video for: "${text.substring(0, 50)}..."\nThis will appear in the Lesson Video section.`);
+  };
+
+  const handlePlayAudio = (text) => {
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 0.9;
+      utterance.pitch = 1;
+      window.speechSynthesis.speak(utterance);
+    }
+  };
+
+  const handleDownloadLesson = (text, format) => {
+    const blob = format === 'pdf' 
+      ? new Blob([text], { type: 'text/plain' })
+      : new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `lesson-${Date.now()}.${format}`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const toggleVideo = () => {
+    if (videoRef.current) {
+      if (videoPlaying) {
+        videoRef.current.pause();
+      } else {
+        videoRef.current.play();
+      }
+      setVideoPlaying(!videoPlaying);
+    }
+  };
+
+  const handleDownloadVideo = () => {
+    alert('Video download functionality would be implemented here');
+  };
 
   return (
     <div className="h-screen bg-[#101113] font-host flex overflow-hidden">
       <Sidebar currentPage="settings" />
 
       <main className="flex-1 flex flex-col h-full overflow-hidden">
-        {/* Header Section */}
         <header className="flex items-center justify-between px-6 py-4 border-b border-[#33363E] bg-[#101113] flex-shrink-0">
           <h2 className="text-[#E7E8E9] text-sm sm:text-base font-semibold ml-11">
-          Welcome Back, John
+            Welcome Back, John
           </h2>
           <div className="flex items-center gap-3">
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#0AEFC9]">
@@ -60,228 +179,409 @@ export default function Settings() {
           </div>
         </header>
 
+        <div className="flex justify-end items-center gap-2 px-4 py-3 sm:px-6 bg-[#101113] relative">
+          <button
+            type="button"
+            onClick={() => setShowDropdown(!showDropdown)}
+            className="inline-flex items-center gap-2 rounded-lg border border-[#454953] bg-[#222328] px-4 py-2 text-xs text-white transition-colors hover:border-white"
+          >
+            Settings
+            <svg className="h-4 w-4" viewBox="0 0 16 16" fill="none">
+              <path d="M4 6L8 10L12 6" stroke="#F9F9F9" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
 
-<div className="flex justify-end items-center gap-2 px-4 py-3 sm:px-6 bg-[#101113] relative">
-  {/* Settings Button */}
-  <button
-    type="button"
-    onClick={() => setShowDropdown(!showDropdown)}
-    className="inline-flex items-center gap-2 rounded-lg border border-[#454953] bg-[#222328] px-4 py-2 text-xs text-white transition-colors hover:border-white"
-  >
-    Settings
-    <svg
-      className="h-4 w-4"
-      viewBox="0 0 16 16"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M4 6L8 10L12 6"
-        stroke="#F9F9F9"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  </button>
+          {showDropdown && (
+            <div className="absolute right-0 top-full mt-2 w-40 bg-white border border-[#454953] rounded-lg shadow-lg z-10">
+              <ul className="flex flex-col">
+                <li className="px-4 py-2 text-black hover:bg-gray-100 cursor-pointer">Profile</li>
+                <li className="px-4 py-2 text-black hover:bg-gray-100 cursor-pointer">Account</li>
+                <li className="px-4 py-2 text-black hover:bg-gray-100 cursor-pointer">Preferences</li>
+              </ul>
+            </div>
+          )}
 
-  {/* Dropdown Menu */}
-  {showDropdown && (
-    <div className="absolute right-0 top-full mt-2 w-40 bg-white border border-[#454953] rounded-lg shadow-lg z-10">
-      <ul className="flex flex-col">
-        <li className="px-4 py-2 text-black hover:bg-gray-100 cursor-pointer">Profile</li>
-        <li className="px-4 py-2 text-black hover:bg-gray-100 cursor-pointer">Account</li>
-        <li className="px-4 py-2 text-black hover:bg-gray-100 cursor-pointer">Preferences</li>
-      </ul>
-    </div>
-  )}
-
-  {/* Disconnect Button */}
-  <button
-    type="button"
-    className="inline-flex items-center gap-2 rounded-lg bg-[#FF3B30] px-4 py-2 text-xs text-white transition-colors hover:bg-[#ff625a]"
-  >
-    Disconnect
-  </button>
-</div>
-
+          <button
+            type="button"
+            className="inline-flex items-center gap-2 rounded-lg bg-[#FF3B30] px-4 py-2 text-xs text-white transition-colors hover:bg-[#ff625a]"
+          >
+            Disconnect
+          </button>
+        </div>
 
         <div className="flex-1 overflow-auto">
-          <div className="mx-auto flex flex-col gap-6 px-4 py-6 sm:px-6 xl:max-w-[1316px]">
-            <div className="grid gap-6 xl:[grid-template-columns:minmax(0,28rem)_minmax(0,1.4fr)_minmax(0,1fr)]">
-              <div className="flex flex-col gap-6">
-                <section className="rounded-2xl border border-[#33363E] bg-[#222328]">
-                  <div className="flex items-center justify-between border-b border-[#33363E] px-4 py-3">
-                    <span className="text-xs tracking-wide text-[#E7E8E9] uppercase">
-                      Video
-                    </span>
+          <div className="mx-auto flex flex-col gap-6 px-4 py-6 sm:px-6 xl:max-w-[1400px]">
+            <div className="grid gap-6 lg:grid-cols-[300px_1fr] xl:grid-cols-[320px_1fr_380px]">
+              
+              {/* Modules Section */}
+              <section className="rounded-2xl border border-[#33363E] bg-[#222328] p-4 h-fit">
+                <h3 className="text-sm font-semibold text-white mb-4 uppercase tracking-wide">Learning Modules</h3>
+                <div className="flex flex-col gap-2">
+                  {modules.map((module) => (
                     <button
-                      type="button"
-                      className="rounded-lg border border-[#454953] px-4 py-2 text-xs text-white transition-colors hover:border-white"
+                      key={module.id}
+                      onClick={() => setSelectedModule(module.id)}
+                      className={`flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all ${
+                        module.active 
+                          ? 'bg-[#007AFF] text-white' 
+                          : 'bg-[#101113] text-[#838794] hover:bg-[#33363E]'
+                      }`}
                     >
-                      Upload Track
+                      <div className={`flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                        module.completed 
+                          ? 'border-[#0AEFC9] bg-[#0AEFC9]' 
+                          : module.active 
+                          ? 'border-white' 
+                          : 'border-[#454953]'
+                      }`}>
+                        {module.completed && (
+                          <svg className="w-3 h-3 text-black" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        )}
+                      </div>
+                      <span className="text-sm font-medium">{module.title}</span>
                     </button>
-                  </div>
-                  <div className="flex min-h-[280px] items-center justify-center px-6 py-8 text-center text-sm text-[#6b6f75]">
-                    Video feed will display here once connected.
-                  </div>
-                </section>
-
-                <section className="rounded-2xl border border-[#33363E] bg-[#222328]">
-                  <div className="flex items-center justify-between border-b border-[#33363E] px-4 py-3">
-                    <span className="text-xs tracking-wide text-[#E7E8E9] uppercase">
-                      AudioWaves
-                    </span>
-                    <button
-                      type="button"
-                      className="rounded-lg bg-[#0AEFC9] px-4 py-2 text-xs font-medium text-black transition-colors hover:bg-[#10ffd4]"
-                    >
-                      Upload Track
-                    </button>
-                  </div>
-                  <div className="flex min-h-[220px] items-center justify-center px-6 py-8 text-center text-sm text-[#6b6f75]">
-                    Audio visualizations will appear once audio is uploaded.
-                  </div>
-                </section>
-              </div>
-
-              <section className="flex flex-col rounded-2xl border border-[#454953] bg-[#222328]">
-                <div className="flex items-center justify-center border-b border-[#33363E] bg-[#101113] px-4 py-3">
-                  <span className="text-xs tracking-wide text-[#E7E8E9] uppercase">
-                    Chat Dialogue
-                  </span>
-                </div>
-                <div className="flex flex-1 min-h-[320px] flex-col items-center justify-center gap-4 px-6 py-10 text-center text-sm text-[#838794] md:min-h-[420px]">
-                  <p className="max-w-[360px] leading-relaxed">
-                    Chat messages between participants and AI agents will be
-                    displayed here once the session begins.
-                  </p>
+                  ))}
                 </div>
               </section>
 
-              <section className="flex flex-col gap-8 rounded-2xl border border-[#33363E] bg-[#222328] px-6 py-6">
-                <div className="flex flex-col gap-1.5">
-                  <h2 className="text-base font-semibold text-white">
-                    Description
-                  </h2>
-                  <p className="rounded-lg bg-[#101113] px-4 py-3 text-sm text-[#696E7E]">
-                    A Playground for Language interpretation
-                  </p>
+              {/* Chat Section */}
+              <section className="flex flex-col rounded-2xl border border-[#33363E] bg-[#222328] overflow-hidden h-[calc(100vh-280px)] min-h-[500px]">
+                <div className="flex items-center justify-between border-b border-[#33363E] bg-[#101113] px-4 py-3">
+                  <span className="text-xs tracking-wide text-[#E7E8E9] uppercase">AI Learning Assistant</span>
+                </div>
+                
+                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                  {messages.map((message) => (
+                    <div key={message.id} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
+                      <div className={`max-w-[80%] rounded-lg p-4 ${
+                        message.type === 'user' 
+                          ? 'bg-[#007AFF] text-white' 
+                          : 'bg-[#101113] text-[#E7E8E9]'
+                      }`}>
+                        {message.isFile && (
+                          <div className="flex items-center gap-2 mb-2">
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M8 4a3 3 0 00-3 3v4a5 5 0 0010 0V7a1 1 0 112 0v4a7 7 0 11-14 0V7a5 5 0 0110 0v4a3 3 0 11-6 0V7a1 1 0 012 0v4a1 1 0 102 0V7a3 3 0 00-3-3z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                        )}
+                        {message.isVoice && (
+                          <div className="flex items-center gap-2 mb-2">
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                        )}
+                        <p className="text-sm leading-relaxed">{message.text}</p>
+                        
+                        {message.type === 'ai' && (
+                          <div className="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-[#33363E]">
+                            <button
+                              onClick={() => handlePlayAudio(message.text)}
+                              className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-[#222328] hover:bg-[#33363E] text-xs text-white transition-colors"
+                              title="Play Audio"
+                            >
+                              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.415z" clipRule="evenodd" />
+                              </svg>
+                              Audio
+                            </button>
+                            <button
+                              onClick={() => handleGenerateVideo(message.text)}
+                              className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-[#007AFF] hover:bg-[#0066DD] text-xs text-white transition-colors"
+                              title="Generate Video"
+                            >
+                              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" />
+                              </svg>
+                              Video
+                            </button>
+                            <button
+                              onClick={() => handleDownloadLesson(message.text, 'txt')}
+                              className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-[#0AEFC9] hover:bg-[#10ffd4] text-xs text-black font-medium transition-colors"
+                              title="Download Lesson"
+                            >
+                              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                              </svg>
+                              Save
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
 
-                <div className="flex flex-col gap-4">
-                  <h2 className="text-base font-semibold text-white">
-                    Settings
-                  </h2>
-                  <div className="flex flex-col divide-y divide-[#33363E] rounded-lg border border-[#33363E]">
-                    {settingsRows.map((row) => (
-                      <div
-                        key={row.label}
-                        className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
-                      >
-                        <span className="text-sm text-[#696E7E]">
-                          {row.label}
-                        </span>
-                        <div className="flex items-center gap-2">
-                          <span
-                            className={`text-sm text-right ${
-                              row.highlight
-                                ? "text-[#007AFF]"
-                                : "text-[#696E7E]"
-                            }`}
-                          >
-                            {row.value}
-                          </span>
-                          {row.highlight && (
-                            <span className="inline-flex h-2.5 w-2.5 rounded-full border border-[#007AFF] bg-[#222328]" />
+                <div className="border-t border-[#33363E] p-4 bg-[#101113]">
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="p-3 rounded-lg bg-[#222328] hover:bg-[#33363E] text-white transition-colors flex-shrink-0"
+                      title="Upload document"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                      </svg>
+                    </button>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                      accept=".pdf,.doc,.docx,.txt"
+                    />
+                    
+                    <input
+                      type="text"
+                      value={inputText}
+                      onChange={(e) => setInputText(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                      placeholder="Type your question here..."
+                      className="flex-1 px-4 py-3 rounded-lg bg-[#222328] text-white placeholder-[#838794] border border-[#454953] focus:border-[#0AEFC9] focus:outline-none text-sm"
+                    />
+                    
+                    <button
+                      onClick={handleVoiceRecord}
+                      className={`p-3 rounded-lg transition-colors flex-shrink-0 ${
+                        isRecording 
+                          ? 'bg-[#FF3B30] text-white animate-pulse' 
+                          : 'bg-[#222328] hover:bg-[#33363E] text-white'
+                      }`}
+                      title={isRecording ? 'Recording...' : 'Record voice'}
+                    >
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                    
+                    <button
+                      onClick={handleSendMessage}
+                      className="px-6 py-3 rounded-lg bg-[#0AEFC9] hover:bg-[#10ffd4] text-black font-medium transition-colors text-sm flex-shrink-0 hidden sm:block"
+                    >
+                      Send
+                    </button>
+                    <button
+                      onClick={handleSendMessage}
+                      className="p-3 rounded-lg bg-[#0AEFC9] hover:bg-[#10ffd4] text-black font-medium transition-colors flex-shrink-0 sm:hidden"
+                      title="Send message"
+                    >
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M2.003 5.884L18.041 10l-16.038 4.116L2 10l.003-4.116zM2 10v3.586l5.293-1.647L2 10z" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </section>
+
+              {/* Right Sidebar - Video & Settings */}
+              <section className="flex flex-col gap-6">
+                {/* Video Section */}
+                <div className="rounded-2xl border border-[#33363E] bg-[#222328] overflow-hidden">
+                  <div className="flex items-center justify-between border-b border-[#33363E] px-4 py-3 bg-[#101113]">
+                    <span className="text-xs tracking-wide text-[#E7E8E9] uppercase">Lesson Video</span>
+                  </div>
+                  <div className="relative bg-black aspect-video">
+                    <video
+                      ref={videoRef}
+                      className="w-full h-full"
+                      poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 225'%3E%3Crect fill='%23000' width='400' height='225'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23838794' font-family='sans-serif' font-size='16'%3EVideo Placeholder%3C/text%3E%3C/svg%3E"
+                    >
+                      <source src="" type="video/mp4" />
+                    </video>
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                      <div className="flex items-center justify-between gap-2">
+                        <button
+                          onClick={toggleVideo}
+                          className="p-2 rounded-lg bg-white/20 hover:bg-white/30 text-white transition-colors"
+                        >
+                          {videoPlaying ? (
+                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                            </svg>
+                          ) : (
+                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                            </svg>
                           )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-4">
-                  <h2 className="text-base font-semibold text-white">Status</h2>
-                  <div className="flex flex-col divide-y divide-[#33363E] rounded-lg border border-[#33363E]">
-                    {statusRows.map((row) => (
-                      <div
-                        key={row.label}
-                        className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
-                      >
-                        <span className="text-sm text-[#696E7E]">
-                          {row.label}
-                        </span>
-                        <span
-                          className={`text-sm text-right ${
-                            row.highlight ? "text-[#007AFF]" : "text-[#696E7E]"
-                          }`}
+                        </button>
+                        <button
+                          onClick={handleDownloadVideo}
+                          className="px-3 py-2 rounded-lg bg-[#0AEFC9] hover:bg-[#10ffd4] text-black text-xs font-medium transition-colors flex items-center gap-1"
                         >
-                          {row.value}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-4">
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <h2 className="text-base font-semibold text-white">
-                      Microphone
-                    </h2>
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        className="flex items-center justify-center rounded border border-[#454953] bg-[#222328] p-2 text-white transition-colors hover:border-white"
-                        aria-label="Toggle microphone"
-                      >
-                        <svg
-                          className="h-6 w-6"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            opacity="0.4"
-                            d="M19.1202 9.11986C18.7302 9.11986 18.4202 9.42986 18.4202 9.81986V11.3999C18.4202 14.9399 15.5402 17.8199 12.0002 17.8199C8.46018 17.8199 5.58018 14.9399 5.58018 11.3999V9.80986C5.58018 9.41986 5.27018 9.10986 4.88018 9.10986C4.49018 9.10986 4.18018 9.41986 4.18018 9.80986V11.3899C4.18018 15.4599 7.31018 18.8099 11.3002 19.1699V21.2999C11.3002 21.6899 11.6102 21.9999 12.0002 21.9999C12.3902 21.9999 12.7002 21.6899 12.7002 21.2999V19.1699C16.6802 18.8199 19.8202 15.4599 19.8202 11.3899V9.80986C19.8102 9.42986 19.5002 9.11986 19.1202 9.11986Z"
-                            fill="#F9F9F9"
-                          />
-                          <path
-                            d="M12.0001 2C9.56008 2 7.58008 3.98 7.58008 6.42V11.54C7.58008 13.98 9.56008 15.96 12.0001 15.96C14.4401 15.96 16.4201 13.98 16.4201 11.54V6.42C16.4201 3.98 14.4401 2 12.0001 2ZM13.3101 8.95C13.2401 9.21 13.0101 9.38 12.7501 9.38C12.7001 9.38 12.6501 9.37 12.6001 9.36C12.2101 9.25 11.8001 9.25 11.4101 9.36C11.0901 9.45 10.7801 9.26 10.7001 8.95C10.6101 8.64 10.8001 8.32 11.1101 8.24C11.7001 8.08 12.3201 8.08 12.9101 8.24C13.2101 8.32 13.3901 8.64 13.3101 8.95ZM13.8401 7.01C13.7501 7.25 13.5301 7.39 13.2901 7.39C13.2201 7.39 13.1601 7.38 13.0901 7.36C12.3901 7.1 11.6101 7.1 10.9101 7.36C10.6101 7.47 10.2701 7.31 10.1601 7.01C10.0501 6.71 10.2101 6.37 10.5101 6.27C11.4701 5.92 12.5301 5.92 13.4901 6.27C13.7901 6.38 13.9501 6.71 13.8401 7.01Z"
-                            fill="#F9F9F9"
-                          />
-                        </svg>
-                      </button>
-                      <div className="inline-flex h-9 items-center gap-2 rounded border border-[#454953] bg-[#222328] px-4">
-                        <span className="text-xs text-white">
-                          Desktop Microphone
-                        </span>
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                          </svg>
+                          Download
+                        </button>
                       </div>
                     </div>
                   </div>
-                  <div className="h-[115px] rounded-lg border border-[#33363E] bg-[#101113]" />
                 </div>
 
-                <div className="flex flex-col gap-2">
-                  <h2 className="text-base font-semibold text-white">
-                    Select AI Agent Color
-                  </h2>
-                  <div className="flex flex-wrap items-center gap-2">
-                    {colors.map((color) => (
+                {/* Settings Section */}
+                <div className="flex flex-col gap-6 rounded-2xl border border-[#33363E] bg-[#222328] px-6 py-6">
+                  <div className="flex flex-col gap-1.5">
+                    <h2 className="text-base font-semibold text-white">Description</h2>
+                    <p className="rounded-lg bg-[#101113] px-4 py-3 text-sm text-[#696E7E]">
+                      A Playground for Language interpretation
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col gap-4">
+                    <h2 className="text-base font-semibold text-white">Language</h2>
+                    <div className="relative">
                       <button
-                        key={color.id}
-                        type="button"
-                        onClick={() => setSelectedColor(color.color)}
-                        aria-label={`Select ${color.label}`}
-                        aria-pressed={selectedColor === color.color}
-                        className={`flex h-9 w-9 items-center justify-center rounded-lg transition-transform focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#101113] ${
-                          selectedColor === color.color
-                            ? "ring-2 ring-white ring-offset-2 ring-offset-[#222328]"
-                            : ""
-                        }`}
-                        style={{ backgroundColor: color.color }}
-                      />
-                    ))}
+                        onClick={() => setShowLanguageDropdown(!showLanguageDropdown)}
+                        className="w-full px-4 py-3 rounded-lg bg-[#101113] hover:bg-[#33363E] text-left text-sm text-[#E7E8E9] border border-[#33363E] transition-colors flex items-center justify-between"
+                      >
+                        <span>{selectedLanguage}</span>
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                      {showLanguageDropdown && (
+                        <div className="absolute top-full mt-2 w-full bg-[#222328] border border-[#33363E] rounded-lg shadow-lg z-20 max-h-60 overflow-y-auto">
+                          {languages.map((lang) => (
+                            <button
+                              key={lang}
+                              onClick={() => {
+                                setSelectedLanguage(lang);
+                                setShowLanguageDropdown(false);
+                              }}
+                              className={`w-full px-4 py-2 text-left text-sm transition-colors ${
+                                selectedLanguage === lang 
+                                  ? 'bg-[#007AFF] text-white' 
+                                  : 'text-[#E7E8E9] hover:bg-[#33363E]'
+                              }`}
+                            >
+                              {lang}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-4">
+                    <h2 className="text-base font-semibold text-white">Selection</h2>
+                    <div className="flex flex-col gap-3">
+                      <button 
+                        onClick={() => setShowVoiceCloningModal(!showVoiceCloningModal)}
+                        className="w-full px-4 py-3 rounded-lg bg-[#101113] hover:bg-[#33363E] text-left text-sm text-[#E7E8E9] border border-[#33363E] transition-colors flex items-center justify-between"
+                      >
+                        <span>Voice Cloning</span>
+                        <svg className="w-5 h-5 text-[#0AEFC9]" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clipRule="evenodd" />
+                        </svg>
+                      </button>
+                      
+                      {showVoiceCloningModal && (
+                        <div className="p-4 rounded-lg bg-[#101113] border border-[#33363E]">
+                          <div className="flex flex-col gap-3">
+                            <div className="flex items-center justify-center p-6 border-2 border-dashed border-[#454953] rounded-lg">
+                              <div className="text-center">
+                                <svg className="w-12 h-12 mx-auto mb-3 text-[#0AEFC9]" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clipRule="evenodd" />
+                                </svg>
+                                <p className="text-xs text-[#838794] mb-2">Record your voice sample</p>
+                                <button className="px-4 py-2 rounded-lg bg-[#0AEFC9] hover:bg-[#10ffd4] text-black text-xs font-medium transition-colors">
+                                  Start Recording
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      <button 
+                        onClick={() => setShowAvatarModal(!showAvatarModal)}
+                        className="w-full px-4 py-3 rounded-lg bg-[#101113] hover:bg-[#33363E] text-left text-sm text-[#E7E8E9] border border-[#33363E] transition-colors flex items-center justify-between"
+                      >
+                        <span>Avatar Selection</span>
+                        <svg className="w-5 h-5 text-[#0AEFC9]" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                        </svg>
+                      </button>
+                      
+                      {showAvatarModal && (
+                        <div className="p-4 rounded-lg bg-[#101113] border border-[#33363E]">
+                          <div className="grid grid-cols-3 gap-3">
+                            {[1, 2, 3, 4, 5, 6].map((avatar) => (
+                              <button
+                                key={avatar}
+                                className="aspect-square rounded-lg bg-[#222328] hover:bg-[#33363E] border-2 border-transparent hover:border-[#0AEFC9] transition-all flex items-center justify-center"
+                              >
+                                <svg className="w-8 h-8 text-[#838794]" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                                </svg>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-4">
+                    <h2 className="text-base font-semibold text-white">Settings</h2>
+                    <div className="flex flex-col divide-y divide-[#33363E] rounded-lg border border-[#33363E]">
+                      {settingsRows.map((row) => (
+                        <div
+                          key={row.label}
+                          className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+                        >
+                          <span className="text-sm text-[#696E7E]">{row.label}</span>
+                          <div className="flex items-center gap-2">
+                            <span className={`text-sm text-right ${row.highlight ? "text-[#007AFF]" : "text-[#696E7E]"}`}>
+                              {row.value}
+                            </span>
+                            {row.highlight && (
+                              <span className="inline-flex h-2.5 w-2.5 rounded-full border border-[#007AFF] bg-[#222328]" />
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-4">
+                    <h2 className="text-base font-semibold text-white">Status</h2>
+                    <div className="flex flex-col divide-y divide-[#33363E] rounded-lg border border-[#33363E]">
+                      {statusRows.map((row) => (
+                        <div
+                          key={row.label}
+                          className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+                        >
+                          <span className="text-sm text-[#696E7E]">{row.label}</span>
+                          <span className={`text-sm text-right ${row.highlight ? "text-[#007AFF]" : "text-[#696E7E]"}`}>
+                            {row.value}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    <h2 className="text-base font-semibold text-white">Select AI Agent Color</h2>
+                    <div className="flex flex-wrap items-center gap-2">
+                      {colors.map((color) => (
+                        <button
+                          key={color.id}
+                          type="button"
+                          onClick={() => setSelectedColor(color.color)}
+                          aria-label={`Select ${color.label}`}
+                          className={`flex h-9 w-9 items-center justify-center rounded-lg transition-transform ${
+                            selectedColor === color.color
+                              ? "ring-2 ring-white ring-offset-2 ring-offset-[#222328]"
+                              : ""
+                          }`}
+                          style={{ backgroundColor: color.color }}
+                        />
+                      ))}
+                    </div>
                   </div>
                 </div>
               </section>
