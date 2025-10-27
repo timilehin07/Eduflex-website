@@ -43,9 +43,9 @@ const modules = [
 
 export default function Settings() {
   const [selectedColor, setSelectedColor] = useState(colors[0].color);
-  const [showDropdown, setShowDropdown] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { id: 1, type: "ai", text: "Hello! I'm your AI learning assistant. How can I help you today?" }
+    { id: 1, type: "ai", text: "Hello! I'm your AI learning assistant. How can I help you today?" },
   ]);
   const [inputText, setInputText] = useState("");
   const [isRecording, setIsRecording] = useState(false);
@@ -55,27 +55,49 @@ export default function Settings() {
   const [showAvatarModal, setShowAvatarModal] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState("English");
   const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
+  const [attachedFile, setAttachedFile] = useState(null);
   const fileInputRef = useRef(null);
   const videoRef = useRef(null);
+  const recognitionRef = useRef(null);
 
   const languages = [
-    "English", "Spanish", "French", "German", "Chinese", 
-    "Japanese", "Korean", "Arabic", "Portuguese", "Russian"
+    "English",
+    "Spanish",
+    "French",
+    "German",
+    "Chinese",
+    "Japanese",
+    "Korean",
+    "Arabic",
+    "Portuguese",
+    "Russian",
   ];
 
   const handleSendMessage = () => {
-    if (inputText.trim()) {
-      const userMessage = { id: Date.now(), type: "user", text: inputText };
+    if (inputText.trim() || attachedFile) {
+      const messageContent = attachedFile ? `${inputText}\n📎 ${attachedFile.name}` : inputText;
+
+      const userMessage = {
+        id: Date.now(),
+        type: "user",
+        text: inputText || `Sent file: ${attachedFile.name}`,
+        fileName: attachedFile?.name,
+        fileSize: attachedFile ? (attachedFile.size / 1024).toFixed(2) + " KB" : null,
+        isFile: !!attachedFile,
+      };
       setMessages([...messages, userMessage]);
       setInputText("");
-      
+      setAttachedFile(null);
+
       setTimeout(() => {
-        const aiResponse = { 
-          id: Date.now() + 1, 
-          type: "ai", 
-          text: `I understand you said: "${inputText}". Let me help you with that topic. This is a detailed explanation that covers the key concepts you need to know.` 
+        const aiResponse = {
+          id: Date.now() + 1,
+          type: "ai",
+          text: attachedFile
+            ? `I've received your message along with the document "${attachedFile.name}". Based on the content, I can help you understand the key concepts and answer any questions you have about it.`
+            : `I understand you said: "${inputText}". Let me help you with that topic. This is a detailed explanation that covers the key concepts you need to know.`,
         };
-        setMessages(prev => [...prev, aiResponse]);
+        setMessages((prev) => [...prev, aiResponse]);
       }, 1000);
     }
   };
@@ -83,34 +105,65 @@ export default function Settings() {
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const fileMessage = { 
-        id: Date.now(), 
-        type: "user", 
-        text: `Uploaded document: ${file.name}`,
-        isFile: true 
-      };
-      setMessages([...messages, fileMessage]);
-      
-      setTimeout(() => {
-        const aiResponse = { 
-          id: Date.now() + 1, 
-          type: "ai", 
-          text: `I've received your document "${file.name}". I'll analyze it and provide insights based on its content.` 
-        };
-        setMessages(prev => [...prev, aiResponse]);
-      }, 1000);
+      setAttachedFile(file);
     }
+    e.target.value = "";
+  };
+
+  const removeAttachedFile = () => {
+    setAttachedFile(null);
   };
 
   const handleVoiceRecord = () => {
     if (!isRecording) {
       setIsRecording(true);
-      setTimeout(() => {
-        const transcribedText = "This is a sample transcribed text from your voice recording";
-        setInputText(transcribedText);
+
+      if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
+
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = "en-US";
+
+        recognition.onresult = (event) => {
+          let finalTranscript = "";
+          let interimTranscript = "";
+
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            const transcript = event.results[i][0].transcript;
+            if (event.results[i].isFinal) {
+              finalTranscript += transcript + " ";
+            } else {
+              interimTranscript += transcript;
+            }
+          }
+
+          setInputText((finalTranscript + interimTranscript).trim());
+        };
+
+        recognition.onerror = (event) => {
+          console.error("Speech recognition error:", event.error);
+          setIsRecording(false);
+          if (event.error === "not-allowed" || event.error === "service-not-allowed") {
+            alert("Microphone access denied. Please allow microphone access in your browser settings.");
+          }
+        };
+
+        recognition.onend = () => {
+          setIsRecording(false);
+        };
+
+        recognition.start();
+        recognitionRef.current = recognition;
+      } else {
+        alert("Speech recognition is not supported in your browser. Please use Chrome, Edge, or Safari.");
         setIsRecording(false);
-      }, 3000);
+      }
     } else {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
       setIsRecording(false);
     }
   };
@@ -120,7 +173,7 @@ export default function Settings() {
   };
 
   const handlePlayAudio = (text) => {
-    if ('speechSynthesis' in window) {
+    if ("speechSynthesis" in window) {
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.rate = 0.9;
       utterance.pitch = 1;
@@ -129,11 +182,9 @@ export default function Settings() {
   };
 
   const handleDownloadLesson = (text, format) => {
-    const blob = format === 'pdf' 
-      ? new Blob([text], { type: 'text/plain' })
-      : new Blob([text], { type: 'text/plain' });
+    const blob = format === "pdf" ? new Blob([text], { type: "text/plain" }) : new Blob([text], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = `lesson-${Date.now()}.${format}`;
     document.body.appendChild(a);
@@ -154,7 +205,12 @@ export default function Settings() {
   };
 
   const handleDownloadVideo = () => {
-    alert('Video download functionality would be implemented here');
+    alert("Video download functionality would be implemented here");
+  };
+
+  const handleLogout = () => {
+    console.log("Logout clicked");
+    setMenuOpen(false);
   };
 
   return (
@@ -162,27 +218,63 @@ export default function Settings() {
       <Sidebar currentPage="settings" />
 
       <main className="flex-1 flex flex-col h-full overflow-hidden">
+        {/* ===== HEADER ===== */}
         <header className="flex items-center justify-between px-6 py-4 border-b border-[#33363E] bg-[#101113] flex-shrink-0">
-          <h2 className="text-[#E7E8E9] text-sm sm:text-base font-semibold ml-11">
-            Welcome Back, John
-          </h2>
-          <div className="flex items-center gap-3">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#0AEFC9]">
-              <span className="text-black text-2xl font-normal">DA</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-white text-base">John Doe</span>
-              <div className="rounded bg-[#33363E] px-2 py-1">
-                <span className="text-[#838794] text-xs">Free Plan</span>
+          {/* Left Section */}
+          <h2 className="text-[#E7E8E9] text-sm sm:text-base font-semibold ml-11">Welcome Back, John</h2>
+
+          {/* Right Section */}
+          <div className="relative">
+            <button
+              onClick={() => setMenuOpen((v) => !v)}
+              className="flex items-center gap-3 focus:outline-none"
+              aria-expanded={menuOpen}
+              aria-haspopup="true"
+            >
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#0AEFC9] hover:bg-[#10ffd4] transition-colors">
+                <span className="text-black text-2xl font-normal">DA</span>
               </div>
-            </div>
+
+              {/* Show name + plan only on larger screens */}
+              <div className="hidden sm:flex flex-col">
+                <span className="text-white text-base">John Doe</span>
+                <div className="rounded bg-[#33363E] px-2 py-1">
+                  <span className="text-[#838794] text-xs">Free Plan</span>
+                </div>
+              </div>
+            </button>
+
+            {/* ===== DROPDOWN MENU ===== */}
+            {menuOpen && (
+              <div
+                className="absolute right-0 mt-2 w-48 bg-[#1A1B1F] border border-[#33363E] rounded-lg shadow-lg z-50 p-3"
+                role="menu"
+                aria-label="Profile menu"
+              >
+                {/* Shown on mobile view only */}
+                <div className="sm:hidden flex flex-col pb-3 border-b border-[#33363E] mb-3">
+                  <span className="text-white text-sm font-medium">John Doe</span>
+                  <div className="rounded bg-[#33363E] px-2 py-1 mt-1.5 w-fit">
+                    <span className="text-[#838794] text-xs">Free Plan</span>
+                  </div>
+                </div>
+
+                {/* Logout Button */}
+                <button
+                  onClick={handleLogout}
+                  className="w-full px-3 py-2 rounded-lg bg-[#FF3B30] hover:bg-[#ff625a] text-white text-sm font-medium transition-colors"
+                >
+                  Logout
+                </button>
+              </div>
+            )}
           </div>
         </header>
 
         <div className="flex justify-end items-center gap-2 px-4 py-3 sm:px-6 bg-[#101113] relative">
           <button
             type="button"
-            onClick={() => setShowDropdown(!showDropdown)}
+            onClick={() => setShowLanguageDropdown(!showLanguageDropdown)}
             className="inline-flex items-center gap-2 rounded-lg border border-[#454953] bg-[#222328] px-4 py-2 text-xs text-white transition-colors hover:border-white"
           >
             Settings
@@ -191,12 +283,12 @@ export default function Settings() {
             </svg>
           </button>
 
-          {showDropdown && (
-            <div className="absolute right-0 top-full mt-2 w-40 bg-white border border-[#454953] rounded-lg shadow-lg z-10">
+          {showLanguageDropdown && (
+            <div className="absolute right-0 top-full mt-2 w-40 bg-[#1A1B1F] border border-[#33363E] rounded-lg shadow-lg z-10">
               <ul className="flex flex-col">
-                <li className="px-4 py-2 text-black hover:bg-gray-100 cursor-pointer">Profile</li>
-                <li className="px-4 py-2 text-black hover:bg-gray-100 cursor-pointer">Account</li>
-                <li className="px-4 py-2 text-black hover:bg-gray-100 cursor-pointer">Preferences</li>
+                <li className="px-4 py-2 text-white hover:bg-[#33363E] cursor-pointer">Profile</li>
+                <li className="px-4 py-2 text-white hover:bg-[#33363E] cursor-pointer">Account</li>
+                <li className="px-4 py-2 text-white hover:bg-[#33363E] cursor-pointer">Preferences</li>
               </ul>
             </div>
           )}
@@ -211,8 +303,7 @@ export default function Settings() {
 
         <div className="flex-1 overflow-auto">
           <div className="mx-auto flex flex-col gap-6 px-4 py-6 sm:px-6 xl:max-w-[1400px]">
-            <div className="grid gap-6 lg:grid-cols-[300px_1fr] xl:grid-cols-[320px_1fr_380px]">
-              
+            <div className="grid gap-4 sm:gap-6 lg:grid-cols-[280px_1fr_380px] xl:grid-cols-[320px_1fr_380px]">
               {/* Modules Section */}
               <section className="rounded-2xl border border-[#33363E] bg-[#222328] p-4 h-fit">
                 <h3 className="text-sm font-semibold text-white mb-4 uppercase tracking-wide">Learning Modules</h3>
@@ -222,21 +313,25 @@ export default function Settings() {
                       key={module.id}
                       onClick={() => setSelectedModule(module.id)}
                       className={`flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all ${
-                        module.active 
-                          ? 'bg-[#007AFF] text-white' 
-                          : 'bg-[#101113] text-[#838794] hover:bg-[#33363E]'
+                        module.active ? "bg-[#007AFF] text-white" : "bg-[#101113] text-[#838794] hover:bg-[#33363E]"
                       }`}
                     >
-                      <div className={`flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                        module.completed 
-                          ? 'border-[#0AEFC9] bg-[#0AEFC9]' 
-                          : module.active 
-                          ? 'border-white' 
-                          : 'border-[#454953]'
-                      }`}>
+                      <div
+                        className={`flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                          module.completed
+                            ? "border-[#0AEFC9] bg-[#0AEFC9]"
+                            : module.active
+                            ? "border-white"
+                            : "border-[#454953]"
+                        }`}
+                      >
                         {module.completed && (
                           <svg className="w-3 h-3 text-black" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
                           </svg>
                         )}
                       </div>
@@ -247,36 +342,37 @@ export default function Settings() {
               </section>
 
               {/* Chat Section */}
-              <section className="flex flex-col rounded-2xl border border-[#33363E] bg-[#222328] overflow-hidden h-[calc(100vh-280px)] min-h-[500px]">
-                <div className="flex items-center justify-between border-b border-[#33363E] bg-[#101113] px-4 py-3">
+              <section className="flex flex-col rounded-2xl border border-[#33363E] bg-[#222328] overflow-hidden h-[600px] sm:h-[650px] lg:h-[calc(100vh-240px)]">
+                <div className="flex items-center justify-between border-b border-[#33363E] bg-[#101113] px-4 py-3 flex-shrink-0">
                   <span className="text-xs tracking-wide text-[#E7E8E9] uppercase">AI Learning Assistant</span>
                 </div>
-                
-                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+
+                <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4 min-h-0">
                   {messages.map((message) => (
-                    <div key={message.id} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-[80%] rounded-lg p-4 ${
-                        message.type === 'user' 
-                          ? 'bg-[#007AFF] text-white' 
-                          : 'bg-[#101113] text-[#E7E8E9]'
-                      }`}>
+                    <div key={message.id} className={`flex ${message.type === "user" ? "justify-end" : "justify-start"}`}>
+                      <div
+                        className={`max-w-[80%] rounded-lg p-3 sm:p-4 ${
+                          message.type === "user" ? "bg-[#007AFF] text-white" : "bg-[#101113] text-[#E7E8E9]"
+                        }`}
+                      >
                         {message.isFile && (
-                          <div className="flex items-center gap-2 mb-2">
-                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M8 4a3 3 0 00-3 3v4a5 5 0 0010 0V7a1 1 0 112 0v4a7 7 0 11-14 0V7a5 5 0 0110 0v4a3 3 0 11-6 0V7a1 1 0 012 0v4a1 1 0 102 0V7a3 3 0 00-3-3z" clipRule="evenodd" />
+                          <div className="flex items-start gap-3 mb-2 p-3 bg-black/20 rounded-lg">
+                            <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                              <path
+                                fillRule="evenodd"
+                                d="M8 4a3 3 0 00-3 3v4a5 5 0 0010 0V7a1 1 0 112 0v4a7 7 0 11-14 0V7a5 5 0 0110 0v4a3 3 0 11-6 0V7a1 1 0 012 0v4a1 1 0 102 0V7a3 3 0 00-3-3z"
+                                clipRule="evenodd"
+                              />
                             </svg>
-                          </div>
-                        )}
-                        {message.isVoice && (
-                          <div className="flex items-center gap-2 mb-2">
-                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clipRule="evenodd" />
-                            </svg>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium truncate">{message.fileName}</p>
+                              <p className="text-xs opacity-75 mt-0.5">{message.fileSize}</p>
+                            </div>
                           </div>
                         )}
                         <p className="text-sm leading-relaxed">{message.text}</p>
-                        
-                        {message.type === 'ai' && (
+
+                        {message.type === "ai" && (
                           <div className="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-[#33363E]">
                             <button
                               onClick={() => handlePlayAudio(message.text)}
@@ -284,7 +380,11 @@ export default function Settings() {
                               title="Play Audio"
                             >
                               <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.415z" clipRule="evenodd" />
+                                <path
+                                  fillRule="evenodd"
+                                  d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.415z"
+                                  clipRule="evenodd"
+                                />
                               </svg>
                               Audio
                             </button>
@@ -299,12 +399,16 @@ export default function Settings() {
                               Video
                             </button>
                             <button
-                              onClick={() => handleDownloadLesson(message.text, 'txt')}
+                              onClick={() => handleDownloadLesson(message.text, "txt")}
                               className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-[#0AEFC9] hover:bg-[#10ffd4] text-xs text-black font-medium transition-colors"
                               title="Download Lesson"
                             >
                               <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                                <path
+                                  fillRule="evenodd"
+                                  d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                                  clipRule="evenodd"
+                                />
                               </svg>
                               Save
                             </button>
@@ -315,63 +419,100 @@ export default function Settings() {
                   ))}
                 </div>
 
-                <div className="border-t border-[#33363E] p-4 bg-[#101113]">
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => fileInputRef.current?.click()}
-                      className="p-3 rounded-lg bg-[#222328] hover:bg-[#33363E] text-white transition-colors flex-shrink-0"
-                      title="Upload document"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-                      </svg>
-                    </button>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      onChange={handleFileUpload}
-                      className="hidden"
-                      accept=".pdf,.doc,.docx,.txt"
-                    />
-                    
-                    <input
-                      type="text"
-                      value={inputText}
-                      onChange={(e) => setInputText(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                      placeholder="Type your question here..."
-                      className="flex-1 px-4 py-3 rounded-lg bg-[#222328] text-white placeholder-[#838794] border border-[#454953] focus:border-[#0AEFC9] focus:outline-none text-sm"
-                    />
-                    
-                    <button
-                      onClick={handleVoiceRecord}
-                      className={`p-3 rounded-lg transition-colors flex-shrink-0 ${
-                        isRecording 
-                          ? 'bg-[#FF3B30] text-white animate-pulse' 
-                          : 'bg-[#222328] hover:bg-[#33363E] text-white'
-                      }`}
-                      title={isRecording ? 'Recording...' : 'Record voice'}
-                    >
-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clipRule="evenodd" />
-                      </svg>
-                    </button>
-                    
-                    <button
-                      onClick={handleSendMessage}
-                      className="px-6 py-3 rounded-lg bg-[#0AEFC9] hover:bg-[#10ffd4] text-black font-medium transition-colors text-sm flex-shrink-0 hidden sm:block"
-                    >
-                      Send
-                    </button>
-                    <button
-                      onClick={handleSendMessage}
-                      className="p-3 rounded-lg bg-[#0AEFC9] hover:bg-[#10ffd4] text-black font-medium transition-colors flex-shrink-0 sm:hidden"
-                      title="Send message"
-                    >
-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M2.003 5.884L18.041 10l-16.038 4.116L2 10l.003-4.116zM2 10v3.586l5.293-1.647L2 10z" />
-                      </svg>
-                    </button>
+                {/* INPUT AREA */}
+                <div className="border-t border-[#33363E] bg-[#101113] flex-shrink-0 pb-[env(safe-area-inset-bottom)]">
+                  {attachedFile && (
+                    <div className="px-3 sm:px-4 pt-3 pb-2">
+                      <div className="flex items-center gap-2 px-3 py-2 bg-[#222328] rounded-lg border border-[#33363E]">
+                        <svg className="w-4 h-4 text-[#0AEFC9] flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                          <path
+                            fillRule="evenodd"
+                            d="M8 4a3 3 0 00-3 3v4a5 5 0 0010 0V7a1 1 0 112 0v4a7 7 0 11-14 0V7a5 5 0 0110 0v4a3 3 0 11-6 0V7a1 1 0 012 0v4a1 1 0 102 0V7a3 3 0 00-3-3z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs text-white truncate">{attachedFile.name}</p>
+                          <p className="text-[10px] text-[#838794]">{(attachedFile.size / 1024).toFixed(2)} KB</p>
+                        </div>
+                        <button
+                          onClick={removeAttachedFile}
+                          className="flex-shrink-0 p-1 hover:bg-[#33363E] rounded transition-colors"
+                        >
+                          <svg className="w-4 h-4 text-[#838794]" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                              fillRule="evenodd"
+                              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="p-3 sm:p-4">
+                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 w-full">
+                      <button
+                        onClick={() => fileInputRef.current?.click()}
+                        className="p-2 sm:p-2.5 rounded-lg bg-[#222328] hover:bg-[#33363E] text-white transition-colors flex-shrink-0"
+                        title="Upload document"
+                      >
+                        <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
+                          />
+                        </svg>
+                      </button>
+
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        onChange={handleFileUpload}
+                        className="hidden"
+                        accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg"
+                      />
+
+                      <input
+                        type="text"
+                        value={inputText}
+                        onChange={(e) => setInputText(e.target.value)}
+                        onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+                        placeholder="Type your question..."
+                        className="flex-1 min-w-0 px-2.5 py-2 sm:px-3 sm:py-2.5 rounded-lg bg-[#222328] text-white text-xs sm:text-sm placeholder-[#838794] border border-[#454953] focus:border-[#0AEFC9] focus:outline-none"
+                      />
+
+                      <button
+                        onClick={handleVoiceRecord}
+                        className={`p-2 sm:p-2.5 rounded-lg transition-colors flex-shrink-0 ${
+                          isRecording ? "bg-[#FF3B30] text-white animate-pulse" : "bg-[#222328] hover:bg-[#33363E] text-white"
+                        }`}
+                        title={isRecording ? "Stop recording" : "Voice input"}
+                      >
+                        <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 20 20">
+                          <path
+                            fillRule="evenodd"
+                            d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </button>
+
+                      <button
+                        onClick={handleSendMessage}
+                        disabled={!inputText.trim() && !attachedFile}
+                        className="p-2 sm:px-4 sm:py-2.5 rounded-lg bg-[#0AEFC9] hover:bg-[#10ffd4] disabled:bg-[#33363E] disabled:cursor-not-allowed text-black font-medium transition-colors flex-shrink-0 flex items-center justify-center"
+                        title="Send message"
+                      >
+                        <span className="hidden sm:inline text-sm">Send</span>
+                        <svg className="w-4 h-4 sm:hidden" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M2.003 5.884L18.041 10l-16.038 4.116L2 10l.003-4.116zM2 10v3.586l5.293-1.647L2 10z" />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </section>
@@ -399,11 +540,19 @@ export default function Settings() {
                         >
                           {videoPlaying ? (
                             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                              <path
+                                fillRule="evenodd"
+                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z"
+                                clipRule="evenodd"
+                              />
                             </svg>
                           ) : (
                             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                              <path
+                                fillRule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
+                                clipRule="evenodd"
+                              />
                             </svg>
                           )}
                         </button>
@@ -412,7 +561,11 @@ export default function Settings() {
                           className="px-3 py-2 rounded-lg bg-[#0AEFC9] hover:bg-[#10ffd4] text-black text-xs font-medium transition-colors flex items-center gap-1"
                         >
                           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                            <path
+                              fillRule="evenodd"
+                              d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                              clipRule="evenodd"
+                            />
                           </svg>
                           Download
                         </button>
@@ -452,9 +605,7 @@ export default function Settings() {
                                 setShowLanguageDropdown(false);
                               }}
                               className={`w-full px-4 py-2 text-left text-sm transition-colors ${
-                                selectedLanguage === lang 
-                                  ? 'bg-[#007AFF] text-white' 
-                                  : 'text-[#E7E8E9] hover:bg-[#33363E]'
+                                selectedLanguage === lang ? "bg-[#007AFF] text-white" : "text-[#E7E8E9] hover:bg-[#33363E]"
                               }`}
                             >
                               {lang}
@@ -468,23 +619,31 @@ export default function Settings() {
                   <div className="flex flex-col gap-4">
                     <h2 className="text-base font-semibold text-white">Selection</h2>
                     <div className="flex flex-col gap-3">
-                      <button 
+                      <button
                         onClick={() => setShowVoiceCloningModal(!showVoiceCloningModal)}
                         className="w-full px-4 py-3 rounded-lg bg-[#101113] hover:bg-[#33363E] text-left text-sm text-[#E7E8E9] border border-[#33363E] transition-colors flex items-center justify-between"
                       >
                         <span>Voice Cloning</span>
                         <svg className="w-5 h-5 text-[#0AEFC9]" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clipRule="evenodd" />
+                          <path
+                            fillRule="evenodd"
+                            d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z"
+                            clipRule="evenodd"
+                          />
                         </svg>
                       </button>
-                      
+
                       {showVoiceCloningModal && (
                         <div className="p-4 rounded-lg bg-[#101113] border border-[#33363E]">
                           <div className="flex flex-col gap-3">
                             <div className="flex items-center justify-center p-6 border-2 border-dashed border-[#454953] rounded-lg">
                               <div className="text-center">
                                 <svg className="w-12 h-12 mx-auto mb-3 text-[#0AEFC9]" fill="currentColor" viewBox="0 0 20 20">
-                                  <path fillRule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clipRule="evenodd" />
+                                  <path
+                                    fillRule="evenodd"
+                                    d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z"
+                                    clipRule="evenodd"
+                                  />
                                 </svg>
                                 <p className="text-xs text-[#838794] mb-2">Record your voice sample</p>
                                 <button className="px-4 py-2 rounded-lg bg-[#0AEFC9] hover:bg-[#10ffd4] text-black text-xs font-medium transition-colors">
@@ -495,8 +654,8 @@ export default function Settings() {
                           </div>
                         </div>
                       )}
-                      
-                      <button 
+
+                      <button
                         onClick={() => setShowAvatarModal(!showAvatarModal)}
                         className="w-full px-4 py-3 rounded-lg bg-[#101113] hover:bg-[#33363E] text-left text-sm text-[#E7E8E9] border border-[#33363E] transition-colors flex items-center justify-between"
                       >
@@ -505,7 +664,7 @@ export default function Settings() {
                           <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                         </svg>
                       </button>
-                      
+
                       {showAvatarModal && (
                         <div className="p-4 rounded-lg bg-[#101113] border border-[#33363E]">
                           <div className="grid grid-cols-3 gap-3">
@@ -574,9 +733,7 @@ export default function Settings() {
                           onClick={() => setSelectedColor(color.color)}
                           aria-label={`Select ${color.label}`}
                           className={`flex h-9 w-9 items-center justify-center rounded-lg transition-transform ${
-                            selectedColor === color.color
-                              ? "ring-2 ring-white ring-offset-2 ring-offset-[#222328]"
-                              : ""
+                            selectedColor === color.color ? "ring-2 ring-white ring-offset-2 ring-offset-[#222328]" : ""
                           }`}
                           style={{ backgroundColor: color.color }}
                         />
