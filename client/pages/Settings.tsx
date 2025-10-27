@@ -44,6 +44,7 @@ const modules = [
 export default function Settings() {
   const [selectedColor, setSelectedColor] = useState(colors[0].color);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
   const [messages, setMessages] = useState([
     { id: 1, type: "ai", text: "Hello! I'm your AI learning assistant. How can I help you today?" },
   ]);
@@ -274,7 +275,7 @@ export default function Settings() {
         <div className="flex justify-end items-center gap-2 px-4 py-3 sm:px-6 bg-[#101113] relative">
           <button
             type="button"
-            onClick={() => setShowLanguageDropdown(!showLanguageDropdown)}
+            onClick={() => setShowDropdown(!showDropdown)}
             className="inline-flex items-center gap-2 rounded-lg border border-[#454953] bg-[#222328] px-4 py-2 text-xs text-white transition-colors hover:border-white"
           >
             Settings
@@ -283,7 +284,7 @@ export default function Settings() {
             </svg>
           </button>
 
-          {showLanguageDropdown && (
+          {showDropdown && (
             <div className="absolute right-0 top-full mt-2 w-40 bg-[#1A1B1F] border border-[#33363E] rounded-lg shadow-lg z-10">
               <ul className="flex flex-col">
                 <li className="px-4 py-2 text-white hover:bg-[#33363E] cursor-pointer">Profile</li>
