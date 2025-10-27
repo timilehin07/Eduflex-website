@@ -1,25 +1,73 @@
+import React, { useState } from "react";
 import Sidebar from "@/components/Sidebar";
 
 export default function Dashboard() {
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const handleLogout = () => {
+    console.log("Logout clicked");
+    setMenuOpen(false);
+  };
+
   return (
     <div className="h-screen bg-[#101113] font-host flex overflow-hidden">
       <Sidebar currentPage="dashboard" />
 
       <main className="flex-1 flex flex-col h-full overflow-hidden">
+        {/* ===== HEADER ===== */}
         <header className="flex items-center justify-between px-6 py-4 border-b border-[#33363E] bg-[#101113] flex-shrink-0">
+          {/* Left Section */}
           <h2 className="text-[#E7E8E9] text-sm sm:text-base font-semibold ml-11">
-          Welcome Back, John
+            Welcome Back, John
           </h2>
-          <div className="flex items-center gap-3">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#0AEFC9]">
-              <span className="text-black text-2xl font-normal">DA</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-white text-base">John Doe</span>
-              <div className="rounded bg-[#33363E] px-2 py-1">
-                <span className="text-[#838794] text-xs">Free Plan</span>
+
+          {/* Right Section */}
+          <div className="relative">
+            <button
+              onClick={() => setMenuOpen((v) => !v)}
+              className="flex items-center gap-3 focus:outline-none"
+              aria-expanded={menuOpen}
+              aria-haspopup="true"
+            >
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#0AEFC9] hover:bg-[#10ffd4] transition-colors">
+                <span className="text-black text-2xl font-normal">DA</span>
               </div>
-            </div>
+
+              {/* Show name + plan only on larger screens */}
+              <div className="hidden sm:flex flex-col">
+                <span className="text-white text-base">John Doe</span>
+                <div className="rounded bg-[#33363E] px-2 py-1">
+                  <span className="text-[#838794] text-xs">Free Plan</span>
+                </div>
+              </div>
+            </button>
+
+            {/* ===== DROPDOWN MENU ===== */}
+            {menuOpen && (
+              <div
+                className="absolute right-0 mt-2 w-48 bg-[#1A1B1F] border border-[#33363E] rounded-lg shadow-lg z-50 p-3"
+                role="menu"
+                aria-label="Profile menu"
+              >
+                {/* Shown on mobile view only */}
+                <div className="sm:hidden flex flex-col pb-3 border-b border-[#33363E] mb-3">
+                  <span className="text-white text-sm font-medium">
+                    John Doe
+                  </span>
+                  <div className="rounded bg-[#33363E] px-2 py-1 mt-1.5 w-fit">
+                    <span className="text-[#838794] text-xs">Free Plan</span>
+                  </div>
+                </div>
+
+                {/* Logout Button */}
+                <button
+                  onClick={handleLogout}
+                  className="w-full px-3 py-2 rounded-lg bg-[#FF3B30] hover:bg-[#ff625a] text-white text-sm font-medium transition-colors"
+                >
+                  Logout
+                </button>
+              </div>
+            )}
           </div>
         </header>
 
