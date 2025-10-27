@@ -300,7 +300,7 @@ function AssistantIcon() {
       xmlns="http://www.w3.org/2000/svg"
     >
       <path
-        d="M6.2797 2.5C6.28029 2.29999 6.24088 2.10191 6.1638 1.91737C6.08671 1.73284 5.97351 1.56559 5.83083 1.42545C5.68816 1.28531 5.51891 1.17511 5.33303 1.10134C5.14715 1.02757 4.94839 0.991709 4.74845 0.995876C4.54851 1.00004 4.35142 1.04415 4.16877 1.1256C3.98612 1.20705 3.82161 1.3242 3.6849 1.47017C3.54819 1.61613 3.44205 1.78796 3.37273 1.97555C3.3034 2.16313 3.27228 2.36268 3.2812 2.56248C2.9873 2.63803 2.71445 2.7795 2.48332 2.97612C2.25218 3.17275 2.06882 3.41941 1.94712 3.69739C1.82542 3.97538 1.76858 4.27741 1.78089 4.58062C1.79321 4.88383 1.87436 5.18026 2.0182 5.44748C1.76529 5.65294 1.56641 5.91708 1.43887 6.21694C1.31133 6.5168 1.25898 6.84326 1.28638 7.16796C1.31379 7.49266 1.42011 7.80575 1.5961 8.07998C1.7721 8.35422 2.01243 8.5813 2.2962 8.74148C2.26116 9.01258 2.28207 9.28802 2.35764 9.55074C2.43322 9.81346 2.56185 10.0579 2.73559 10.269C2.90934 10.4801 3.12451 10.6533 3.36781 10.7779C3.61111 10.9025 3.87739 10.976 4.15019 10.9937C4.42299 11.0114 4.69652 10.973 4.95389 10.8808C5.21127 10.7887 5.44702 10.6446 5.64658 10.4578C5.84614 10.2711 6.00529 10.0453 6.11418 9.79451C6.22308 9.54376 6.27941 9.27335 6.2797 9L6.2797 2.5Z"
+        d="M6.2797 2.5C6.28029 2.29999 6.24088 2.10191 6.1638 1.91737C6.08671 1.73284 6.97351 1.56559 5.83083 1.42545C5.68816 1.28531 5.51891 1.17511 5.33303 1.10134C5.14715 1.02757 4.94839 0.991709 4.74845 0.995876C4.54851 1.00004 4.35142 1.04415 4.16877 1.1256C3.98612 1.20705 3.82161 1.3242 3.6849 1.47017C3.54819 1.61613 3.44205 1.78796 3.37273 1.97555C3.3034 2.16313 3.27228 2.36268 3.2812 2.56248C2.9873 2.63803 2.71445 2.7795 2.48332 2.97612C2.25218 3.17275 2.06882 3.41941 1.94712 3.69739C1.82542 3.97538 1.76858 4.27741 1.78089 4.58062C1.79321 4.88383 1.87436 5.18026 2.0182 5.44748C1.76529 5.65294 1.56641 5.91708 1.43887 6.21694C1.31133 6.5168 1.25898 6.84326 1.28638 7.16796C1.31379 7.49266 1.42011 7.80575 1.5961 8.07998C1.7721 8.35422 2.01243 8.5813 2.2962 8.74148C2.26116 9.01258 2.28207 9.28802 2.35764 9.55074C2.43322 9.81346 2.56185 10.0579 2.73559 10.269C2.90934 10.4801 3.12451 10.6533 3.36781 10.7779C3.61111 10.9025 3.87739 10.976 4.15019 10.9937C4.42299 11.0114 4.69652 10.973 4.95389 10.8808C5.21127 10.7887 5.44702 10.6446 5.64658 10.4578C5.84614 10.2711 6.00529 10.0453 6.11418 9.79451C6.22308 9.54376 6.27941 9.27335 6.2797 9L6.2797 2.5Z"
         stroke="#B6B8C0"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -467,6 +467,12 @@ function TabIcon({ type }: { type: (typeof tabs)[number]["icon"] }) {
 
 export default function MyCourses() {
   const [activeTab, setActiveTab] = useState<TabId>("active");
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const handleLogout = () => {
+    console.log("Logout clicked");
+    setMenuOpen(false);
+  };
 
   const tabCourses = useMemo(() => {
     switch (activeTab) {
@@ -488,20 +494,60 @@ export default function MyCourses() {
       <Sidebar currentPage="my-courses" />
 
       <main className="flex-1 flex flex-col h-full overflow-hidden">
+        {/* ===== HEADER ===== */}
         <header className="flex items-center justify-between px-6 py-4 border-b border-[#33363E] bg-[#101113] flex-shrink-0">
+          {/* Left Section */}
           <h2 className="text-[#E7E8E9] text-sm sm:text-base font-semibold ml-11">
-           Welcome Back, John
+            Welcome Back, John
           </h2>
-          <div className="flex items-center gap-3">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#0AEFC9]">
-              <span className="text-black text-2xl font-normal">DA</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-white text-base">John Doe</span>
-              <div className="rounded bg-[#33363E] px-2 py-1">
-                <span className="text-[#838794] text-xs">Free Plan</span>
+
+          {/* Right Section */}
+          <div className="relative">
+            <button
+              onClick={() => setMenuOpen((v) => !v)}
+              className="flex items-center gap-3 focus:outline-none"
+              aria-expanded={menuOpen}
+              aria-haspopup="true"
+            >
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#0AEFC9] hover:bg-[#10ffd4] transition-colors">
+                <span className="text-black text-2xl font-normal">DA</span>
               </div>
-            </div>
+
+              {/* Show name + plan only on larger screens */}
+              <div className="hidden sm:flex flex-col">
+                <span className="text-white text-base">John Doe</span>
+                <div className="rounded bg-[#33363E] px-2 py-1">
+                  <span className="text-[#838794] text-xs">Free Plan</span>
+                </div>
+              </div>
+            </button>
+
+            {/* ===== DROPDOWN MENU ===== */}
+            {menuOpen && (
+              <div
+                className="absolute right-0 mt-2 w-48 bg-[#1A1B1F] border border-[#33363E] rounded-lg shadow-lg z-50 p-3"
+                role="menu"
+                aria-label="Profile menu"
+              >
+                {/* Shown on mobile view only */}
+                <div className="sm:hidden flex flex-col pb-3 border-b border-[#33363E] mb-3">
+                  <span className="text-white text-sm font-medium">
+                    John Doe
+                  </span>
+                  <div className="rounded bg-[#33363E] px-2 py-1 mt-1.5 w-fit">
+                    <span className="text-[#838794] text-xs">Free Plan</span>
+                  </div>
+                </div>
+
+                {/* Logout Button */}
+                <button
+                  onClick={handleLogout}
+                  className="w-full px-3 py-2 rounded-lg bg-[#FF3B30] hover:bg-[#ff625a] text-white text-sm font-medium transition-colors"
+                >
+                  Logout
+                </button>
+              </div>
+            )}
           </div>
         </header>
 
