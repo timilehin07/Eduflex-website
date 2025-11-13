@@ -1,11 +1,70 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useState } from "react";
 
 export default function SignupVerify() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const email = location.state?.email || ''; // Assuming email is passed via navigation state from signup page
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [otp, setOtp] = useState('');
+  const [error, setError] = useState('');
+  const [resendMessage, setResendMessage] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const maskEmail = (email) => {
+    if (!email) return 'your email';
+    const [username, domain] = email.split('@');
+    const maskedUsername = username.substring(0, 5) + '**';
+    return `${maskedUsername}@${domain}`;
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    navigate("/signup-success");
+    if (otp.length !== 6) {
+      setError('Please enter a 6-digit code');
+      return;
+    }
+    setError('');
+    setLoading(true);
+    try {
+      const response = await fetch('https://eduflexbackend.funtech.dev/api-gateway/v1/auth/otp/verify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, otp }),
+      });
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || 'Verification failed');
+      }
+      navigate("/signup-success");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    setError('');
+    setResendMessage('');
+    try {
+      const response = await fetch('https://eduflexbackend.funtech.dev/api-gateway/v1/auth/otp/resend', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || 'Failed to resend code');
+      }
+      setResendMessage('Code resent successfully');
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
   return (
@@ -13,12 +72,8 @@ export default function SignupVerify() {
       <div className="w-full lg:w-1/2 bg-brand-dark relative flex items-center justify-center p-6 sm:p-8 lg:p-12">
         <div
           className="absolute top-0 left-0 w-[793px] h-[793px] rounded-full opacity-20 -translate-x-[290px] -translate-y-[239px]"
-          style={{
-            background: "#CED671",
-            filter: "blur(198.45px)",
-          }}
+          style={{ background: "#CED671", filter: "blur(198.45px)", }}
         />
-
         <Link
           to="/signup"
           className="absolute top-6 left-6 flex items-center gap-1.5 px-3 py-3 rounded bg-white hover:bg-gray-50 transition-colors z-10"
@@ -41,7 +96,6 @@ export default function SignupVerify() {
             Go Back
           </span>
         </Link>
-
         <div className="relative w-full max-w-[449px] bg-white rounded-3xl border border-[#E7E8E9] p-6 flex flex-col items-center justify-between min-h-[495px]">
           <div className="flex items-center justify-center w-[146px] h-[46px]">
             <svg
@@ -100,7 +154,6 @@ export default function SignupVerify() {
               </defs>
             </svg>
           </div>
-
           <form onSubmit={handleSubmit} className="w-full flex flex-col gap-12">
             <div className="flex flex-col gap-[22px]">
               <div className="flex flex-col gap-8">
@@ -109,10 +162,9 @@ export default function SignupVerify() {
                     Verify your account
                   </h1>
                   <p className="text-[#838794] font-host text-base font-normal leading-[120%]">
-                    Enter 6-digit code sent to the email ololo**@gmail.com
+                    Enter 6-digit code sent to the email {maskEmail(email)}
                   </p>
                 </div>
-
                 <div className="flex flex-col gap-6">
                   <div className="flex flex-col gap-1">
                     <label
@@ -139,18 +191,24 @@ export default function SignupVerify() {
                       <input
                         id="otp"
                         type="text"
-                        placeholder="Enter 6-digit codecodes"
+                        placeholder="Enter 6-digit code"
                         maxLength={6}
+                        value={otp}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/\D/g, '');
+                          setOtp(value);
+                        }}
                         className="flex-1 text-[#98A2B3] font-host text-sm font-normal leading-[160%] outline-none placeholder:text-[#98A2B3]"
                         required
                       />
                     </div>
                   </div>
+                  {error && <p className="text-red-500 text-sm">{error}</p>}
                 </div>
               </div>
-
               <button
                 type="submit"
+                disabled={loading || otp.length !== 6}
                 className="flex h-12 px-4 items-center justify-center gap-2 rounded-full bg-brand-purple hover:bg-brand-purple/90 transition-colors shadow-[0_8px_24px_rgba(10,131,255,0.15)]"
               >
                 <span className="text-white font-host text-base font-medium leading-[160%]">
@@ -158,17 +216,17 @@ export default function SignupVerify() {
                 </span>
               </button>
             </div>
-
-            <button
-              type="button"
-              className="text-[#468FFD] text-center font-host text-base font-normal leading-[120%] hover:underline"
-            >
-              Resend Code
-            </button>
           </form>
+          <button
+            type="button"
+            onClick={handleResend}
+            className="text-[#468FFD] text-center font-host text-base font-normal leading-[120%] hover:underline"
+          >
+            Resend Code
+          </button>
+          {resendMessage && <p className="text-green-500 text-sm mt-2">{resendMessage}</p>}
         </div>
       </div>
-
       <div className="hidden lg:block lg:w-1/2 relative">
         <img
           src="https://api.builder.io/api/v1/image/assets/TEMP/494915144f83153c3908d0ebef3bcd2adc29906d?width=1440"
