@@ -1,22 +1,130 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+
+interface Country {
+  id: string;
+  name: string;
+  phone_code: number;
+  code: string;
+  currency: string;
+  capital: string;
+  iso_code: string;
+  is_supported: boolean;
+}
 
 export default function Signup() {
   const navigate = useNavigate();
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  
+  // Country dropdown states
+  const [countries, setCountries] = useState<Country[]>([]);
+  const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
+  const [showCountryDropdown, setShowCountryDropdown] = useState(false);
+  const [countrySearchTerm, setCountrySearchTerm] = useState("");
 
+  // Password validation
   const hasMinLength = password.length >= 8;
   const hasUppercase = /[A-Z]/.test(password);
   const hasLowercase = /[a-z]/.test(password);
   const hasNumber = /\d/.test(password);
   const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Fetch countries on component mount
+  useEffect(() => {
+    fetchCountries();
+  }, []);
+
+  const fetchCountries = async () => {
+    try {
+      const response = await fetch(
+        "https://eduflexbackend.funtech.dev/api-gateway/v1/system/country_list"
+      );
+      const result = await response.json();
+      if (response.ok && result.data) {
+        setCountries(result.data);
+        // Set Nigeria as default
+        const nigeria = result.data.find((c: Country) => c.code === "NG");
+        if (nigeria) {
+          setSelectedCountry(nigeria);
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching countries:", err);
+    }
+  };
+
+  const filteredCountries = countries.filter((country) =>
+    country.name.toLowerCase().includes(countrySearchTerm.toLowerCase()) ||
+    country.phone_code.toString().includes(countrySearchTerm)
+  );
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === confirmPassword && agreedToTerms) {
-      navigate("/signup-verify");
+    setError("");
+
+    // Validation
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
+    if (!agreedToTerms) {
+      setError("Please agree to the Terms & Conditions");
+      return;
+    }
+
+    if (!selectedCountry) {
+      setError("Please select a country");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(
+        "https://eduflexbackend.funtech.dev/api-gateway/v1/auth/signup",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "accept": "*/*",
+          },
+          body: JSON.stringify({
+            firstname: firstName,
+            lastname: lastName,
+            email: email,
+            phone: phone,
+            country: {
+              name: selectedCountry.name,
+              code: selectedCountry.code,
+            },
+            password: password,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Navigate to OTP verification page
+        navigate("/signup-verify", { state: { email: email } });
+      } else {
+        // Handle error response
+        setError(data.message || "Signup failed. Please try again.");
+      }
+    } catch (err) {
+      setError("Network error. Please check your connection and try again.");
+      console.error("Signup error:", err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -119,40 +227,53 @@ export default function Signup() {
                 </div>
 
                 <div className="flex flex-col gap-[15px]">
+                  {error && (
+                    <div className="px-4 py-3 rounded-lg bg-red-50 border border-red-200">
+                      <p className="text-red-800 text-sm font-medium">
+                        {error}
+                      </p>
+                    </div>
+                  )}
+
                   <div className="flex items-start gap-2 flex-wrap">
-  <div className="flex-1 flex flex-col gap-1 min-w-0">
-    <label
-      htmlFor="firstName"
-      className="text-[#33363E] font-host text-sm font-medium leading-[160%]"
-    >
-      First Name
-    </label>
-    <input
-      id="firstName"
-      type="text"
-      placeholder="First Name"
-      className="w-full px-3 py-[13px] rounded-[10px] border border-[#E2E4E9] bg-white shadow-[0_1px_2px_0_rgba(228,229,231,0.24)] text-[#98A2B3] font-host text-sm font-normal leading-[160%] outline-none placeholder:text-[#98A2B3]"
-      required
-    />
-  </div>
+                    <div className="flex-1 flex flex-col gap-1 min-w-0">
+                      <label
+                        htmlFor="firstName"
+                        className="text-[#33363E] font-host text-sm font-medium leading-[160%]"
+                      >
+                        First Name
+                      </label>
+                      <input
+                        id="firstName"
+                        type="text"
+                        placeholder="First Name"
+                        className="w-full px-3 py-[13px] rounded-[10px] border border-[#E2E4E9] bg-white shadow-[0_1px_2px_0_rgba(228,229,231,0.24)] text-[#00000A] font-host text-sm font-normal leading-[160%] outline-none placeholder:text-[#98A2B3]"
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        required
+                        disabled={isLoading}
+                      />
+                    </div>
 
-  <div className="flex-1 flex flex-col gap-1 min-w-0">
-    <label
-      htmlFor="lastName"
-      className="text-[#33363E] font-host text-sm font-medium leading-[160%]"
-    >
-      Last Name
-    </label>
-    <input
-      id="lastName"
-      type="text"
-      placeholder="Last Name"
-      className="w-full px-3 py-[13px] rounded-[10px] border border-[#E2E4E9] bg-white shadow-[0_1px_2px_0_rgba(228,229,231,0.24)] text-[#98A2B3] font-host text-sm font-normal leading-[160%] outline-none placeholder:text-[#98A2B3]"
-      required
-    />
-  </div>
-</div>
-
+                    <div className="flex-1 flex flex-col gap-1 min-w-0">
+                      <label
+                        htmlFor="lastName"
+                        className="text-[#33363E] font-host text-sm font-medium leading-[160%]"
+                      >
+                        Last Name
+                      </label>
+                      <input
+                        id="lastName"
+                        type="text"
+                        placeholder="Last Name"
+                        className="w-full px-3 py-[13px] rounded-[10px] border border-[#E2E4E9] bg-white shadow-[0_1px_2px_0_rgba(228,229,231,0.24)] text-[#00000A] font-host text-sm font-normal leading-[160%] outline-none placeholder:text-[#98A2B3]"
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        required
+                        disabled={isLoading}
+                      />
+                    </div>
+                  </div>
 
                   <div className="flex flex-col gap-1">
                     <label
@@ -180,8 +301,11 @@ export default function Signup() {
                         id="email"
                         type="email"
                         placeholder="namesurname@gmail.com"
-                        className="flex-1 text-[#98A2B3] font-host text-sm font-normal leading-[160%] outline-none placeholder:text-[#98A2B3]"
+                        className="flex-1 text-[#00000A] font-host text-sm font-normal leading-[160%] outline-none placeholder:text-[#98A2B3]"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                         required
+                        disabled={isLoading}
                       />
                     </div>
                   </div>
@@ -214,9 +338,10 @@ export default function Signup() {
                           type="password"
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
-                          placeholder="Enter 6-digit codecodes"
-                          className="flex-1 text-[#98A2B3] font-host text-sm font-normal leading-[160%] outline-none placeholder:text-[#98A2B3]"
+                          placeholder="Enter your password"
+                          className="flex-1 text-[#00000A] font-host text-sm font-normal leading-[160%] outline-none placeholder:text-[#98A2B3]"
                           required
+                          disabled={isLoading}
                         />
                       </div>
                     </div>
@@ -308,82 +433,102 @@ export default function Signup() {
                           type="password"
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
-                          placeholder="Enter 6-digit codecodes"
-                          className="flex-1 text-[#98A2B3] font-host text-sm font-normal leading-[160%] outline-none placeholder:text-[#98A2B3]"
+                          placeholder="Confirm your password"
+                          className="flex-1 text-[#00000A] font-host text-sm font-normal leading-[160%] outline-none placeholder:text-[#98A2B3]"
                           required
+                          disabled={isLoading}
                         />
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-1">
-  <label
-    htmlFor="mobile"
-    className="text-[#090909] font-host text-sm font-medium leading-normal tracking-[-0.28px]"
-  >
-    Mobile Number
-  </label>
+                  <div className="flex flex-col gap-1 relative">
+                    <label
+                      htmlFor="mobile"
+                      className="text-[#090909] font-host text-sm font-medium leading-normal tracking-[-0.28px]"
+                    >
+                      Mobile Number
+                    </label>
 
-  <div className="flex items-start gap-1.5 flex-wrap sm:flex-nowrap">
-    <div className="flex px-2 py-[15px] flex-col items-center justify-center gap-2.5 rounded-[10px] border border-[#E5E5E6] bg-white min-w-[70px] sm:min-w-[90px]">
-      <div className="flex h-[18px] items-center gap-1">
-        <svg
-          className="w-4 h-4"
-          viewBox="0 0 16 16"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <g clipPath="url(#clip0_36_10422)">
-            <path
-              d="M8 16C12.4183 16 16 12.4183 16 8C16 3.58172 12.4183 0 8 0C3.58172 0 0 3.58172 0 8C0 12.4183 3.58172 16 8 16Z"
-              fill="#F0F0F0"
-            />
-            <path
-              d="M0 7.99993C0 11.4397 2.171 14.372 5.21741 15.5024V0.497559C2.171 1.62787 0 4.56025 0 7.99993Z"
-              fill="#6DA544"
-            />
-            <path
-              d="M15.9996 7.99993C15.9996 4.56025 13.8286 1.62787 10.7822 0.497559V15.5024C13.8286 14.372 15.9996 11.4397 15.9996 7.99993Z"
-              fill="#6DA544"
-            />
-          </g>
-          <defs>
-            <clipPath id="clip0_36_10422">
-              <rect width="16" height="16" fill="white" />
-            </clipPath>
-          </defs>
-        </svg>
+                    <div className="flex items-start gap-1.5 flex-wrap sm:flex-nowrap">
+                      <div className="relative">
+                        <button
+                          type="button"
+                          onClick={() => setShowCountryDropdown(!showCountryDropdown)}
+                          className="flex px-2 py-[15px] flex-col items-center justify-center gap-2.5 rounded-[10px] border border-[#E5E5E6] bg-white min-w-[70px] sm:min-w-[90px]"
+                          disabled={isLoading}
+                        >
+                          <div className="flex h-[18px] items-center gap-1">
+                            <span className="text-[#AAAAAD] font-['Inter'] text-base font-normal tracking-[-0.32px]">
+                              +{selectedCountry?.phone_code || "234"}
+                            </span>
 
-        <span className="text-[#AAAAAD] font-['Inter'] text-base font-normal tracking-[-0.32px]">
-          +234
-        </span>
+                            <svg
+                              className="w-4 h-4"
+                              viewBox="0 0 16 16"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M4 6L8 10L12 6"
+                                stroke="#00000A"
+                                strokeWidth="1.2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                          </div>
+                        </button>
 
-        <svg
-          className="w-4 h-4"
-          viewBox="0 0 16 16"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M4 6L8 10L12 6"
-            stroke="#00000A"
-            strokeWidth="1.2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </div>
-    </div>
+                        {showCountryDropdown && (
+                          <div className="absolute top-full left-0 mt-1 w-[280px] max-h-[300px] overflow-y-auto bg-white border border-[#E5E5E6] rounded-lg shadow-lg z-50">
+                            <div className="sticky top-0 bg-white p-2 border-b border-[#E5E5E6]">
+                              <input
+                                type="text"
+                                placeholder="Search country..."
+                                value={countrySearchTerm}
+                                onChange={(e) => setCountrySearchTerm(e.target.value)}
+                                className="w-full px-3 py-2 text-sm border border-[#E5E5E6] rounded-md outline-none focus:border-brand-purple"
+                              />
+                            </div>
+                            <div className="py-1">
+                              {filteredCountries.map((country) => (
+                                <button
+                                  key={country.id}
+                                  type="button"
+                                  onClick={() => {
+                                    setSelectedCountry(country);
+                                    setShowCountryDropdown(false);
+                                    setCountrySearchTerm("");
+                                  }}
+                                  className="w-full px-3 py-2 text-left hover:bg-gray-100 flex items-center justify-between text-sm"
+                                >
+                                  <span className="text-[#00000A]">{country.name}</span>
+                                  <span className="text-[#AAAAAD]">+{country.phone_code}</span>
+                                </button>
+                              ))}
+                              {filteredCountries.length === 0 && (
+                                <div className="px-3 py-2 text-sm text-[#AAAAAD]">
+                                  No countries found
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
 
-    <input
-      id="mobile"
-      type="tel"
-      placeholder="0000 000 000"
-      className="flex-1 min-w-0 w-full px-4 py-[15px] flex-col items-start justify-center gap-2.5 rounded-[10px] border border-[#DBDBDC] bg-white text-[#AAAAAD] font-['Inter'] text-base font-normal tracking-[-0.32px] outline-none placeholder:text-[#AAAAAD]"
-    />
-  </div>
-</div>
-
+                      <input
+                        id="mobile"
+                        type="tel"
+                        placeholder="0000 000 000"
+                        className="flex-1 min-w-0 w-full px-4 py-[15px] flex-col items-start justify-center gap-2.5 rounded-[10px] border border-[#DBDBDC] bg-white text-[#00000A] font-['Inter'] text-base font-normal tracking-[-0.32px] outline-none placeholder:text-[#AAAAAD]"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        required
+                        disabled={isLoading}
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -397,6 +542,7 @@ export default function Signup() {
                   onChange={(e) => setAgreedToTerms(e.target.checked)}
                   className="w-[18px] h-[18px] rounded border-[1.5px] border-[#00B55A] mt-0.5"
                   required
+                  disabled={isLoading}
                 />
                 <label
                   htmlFor="terms"
@@ -412,11 +558,40 @@ export default function Signup() {
 
               <button
                 type="submit"
-                className="w-full flex h-12 px-4 items-center justify-center gap-2 rounded-full bg-brand-purple hover:bg-brand-purple/90 transition-colors shadow-[0_8px_24px_rgba(10,131,255,0.15)]"
+                disabled={isLoading}
+                className="w-full flex h-12 px-4 items-center justify-center gap-2 rounded-full bg-brand-purple hover:bg-brand-purple/90 transition-colors shadow-[0_8px_24px_rgba(10,131,255,0.15)] disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <span className="text-white font-host text-base font-medium leading-[160%]">
-                  Login Account
-                </span>
+                {isLoading ? (
+                  <>
+                    <svg
+                      className="animate-spin h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    <span className="text-white font-host text-base font-medium leading-[160%]">
+                      Creating Account...
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-white font-host text-base font-medium leading-[160%]">
+                    Create Account
+                  </span>
+                )}
               </button>
             </div>
           </form>
