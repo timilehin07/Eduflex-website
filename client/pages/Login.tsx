@@ -1,3 +1,4 @@
+// client/pages/Login.tsx
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -10,101 +11,77 @@ export default function Login() {
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setError("");
-  setIsLoading(true);
+    e.preventDefault();
+    setError("");
+    setIsLoading(true);
 
-  try {
-    const loginRes = await fetch(
-      "https://eduflexbackend.funtech.dev/api-gateway/v1/auth/login",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          accept: "*/*",
-        },
-        body: JSON.stringify({
-          email: email.trim(),
-          password,
-          account_type: "customer",
-        }),
-      }
-    );
-
-    const loginData = await loginRes.json();
-    console.log("LOGIN RESPONSE:", loginData);
-
-    if (loginRes.ok) {
-      // ✅ Get token correctly
-      const token =
-        loginData.data?.tokens?.access ||
-        loginData.data?.tokens?.token ||
-        loginData.data?.tokens?.access_token ||
-        loginData.data?.token ||
-        loginData.token;
-
-      if (token) {
-        // Save token
-        localStorage.setItem("authToken", token);
-
-        // Save user name
-        const name =
-          loginData.data?.user?.first_name ||
-          loginData.data?.user?.firstname ||
-          loginData.data?.user?.name;
-        if (name) localStorage.setItem("userName", name);
-
-        // Redirect
-        navigate("/dashboard", { replace: true });
-        return;
-      } else {
-        setError("Login successful but no token found in tokens object.");
-      }
-    } else if (loginData.message?.toLowerCase().includes("verify")) {
-      const otpRes = await fetch(
-        "https://eduflexbackend.funtech.dev/api-gateway/v1/auth/otp/send",
+    try {
+      const loginRes = await fetch(
+        "https://eduflexbackend.funtech.dev/api-gateway/v1/auth/login",
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            accept: "*/*",
+          },
           body: JSON.stringify({
             email: email.trim(),
+            password,
             account_type: "customer",
           }),
         }
       );
 
-      if (otpRes.ok) {
-        navigate("/verify-otp", {
-          state: { email: email.trim(), isNewUser: true },
-          replace: true,
-        });
-      } else {
-        setError("Failed to send code. Try again.");
-      }
-    } else {
-      setError(loginData.message || "Invalid email or password");
-    }
-  } catch (err) {
-    console.error("Login error:", err);
-    setError("Network error. Try again.");
-  } finally {
-    setIsLoading(false);
-  }
-};
+      const loginData = await loginRes.json();
 
+      if (loginRes.ok) {
+        const token = loginData.token || loginData.access_token;
+        if (token) localStorage.setItem("authToken", token);
+        navigate("/dashboard", { replace: true });
+        return;
+      }
+
+      if (loginData.message?.toLowerCase().includes("verify")) {
+        const otpRes = await fetch(
+          "https://eduflexbackend.funtech.dev/api-gateway/v1/auth/otp/send",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: email.trim(),
+              account_type: "customer",
+            }),
+          }
+        );
+
+        if (otpRes.ok) {
+          navigate("/verify-otp", {
+            state: { email: email.trim(), isNewUser: true },
+            replace: true,
+          });
+        } else {
+          setError("Failed to send code. Try again.");
+        }
+      } else {
+        setError("Invalid email or password");
+      }
+    } catch (err) {
+      setError("Network error. Try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen w-full flex bg-white font-host overflow-x-hidden">
-      {/* LEFT SIDE - FORM (Original bg-brand-dark) */}
       <div className="w-full lg:w-1/2 bg-brand-dark relative flex items-center justify-center p-4 sm:p-6 lg:p-12">
-        {/* REMOVED BLOB — it caused overflow on mobile */}
-        {/* No background blob on mobile to prevent scroll */}
+        {/* REMOVED ONLY THE OVERFLOWING BLOB — it was w-[793px] → broke mobile */}
+        {/* <div className="absolute top-0 left-0 w-[793px] ..."></div> */}
 
-        <div className="relative w-full max-w-md mx-auto bg-white rounded-3xl border border-[#E7E8E9] p-5 sm:p-6 flex flex-col items-center gap-10">
-          {/* Logo */}
-          <div className="w-full max-w-[140px] mx-auto">
+        <div className="relative w-full max-w-md mx-auto bg-white rounded-3xl border border-[#E7E8E9] p-6 flex flex-col items-center gap-12">
+          <div className="flex items-center justify-center w-[146px] h-[46px]">
             <svg
-              className="w-full h-auto"
+              className="w-[128px] h-auto"
               viewBox="0 0 128 37"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -160,22 +137,24 @@ export default function Login() {
             </svg>
           </div>
 
-          <form onSubmit={handleSubmit} className="w-full flex flex-col gap-10">
-            <div className="flex flex-col gap-5">
-              <div className="flex flex-col gap-6">
+          <form onSubmit={handleSubmit} className="w-full flex flex-col gap-12">
+            <div className="flex flex-col gap-[22px]">
+              <div className="flex flex-col gap-7">
                 <div className="flex flex-col gap-2">
                   <h1 className="text-black font-host text-2xl font-semibold leading-[120%]">
                     Login Your Account
                   </h1>
-                  <div className="flex flex-wrap items-center gap-2 text-sm sm:text-base">
-                    <span className="text-[#696E7E] font-host">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[#696E7E] font-host text-base font-normal leading-[120%]">
                       Don't have an Account
                     </span>
                     <Link
                       to="/signup"
-                      className="flex items-center gap-1 group text-[#035638] hover:underline"
+                      className="flex items-center gap-1 group"
                     >
-                      <span>Create Account</span>
+                      <span className="text-[#035638] font-host text-base font-normal leading-[120%] group-hover:underline">
+                        Create Account
+                      </span>
                       <svg
                         className="w-4 h-4"
                         viewBox="0 0 16 17"
@@ -279,7 +258,7 @@ export default function Login() {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-brand-purple hover:bg-brand-purple/90 transition-colors shadow-[0_8px_24px_rgba(10,131,255,0.15)] disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex h-12 px-4 items-center justify-center gap-2 rounded-full bg-brand-purple hover:bg-brand-purple/90 transition-colors shadow-[0_8px_24px_rgba(10,131,255,0.15)] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isLoading ? (
                       <>
@@ -327,7 +306,6 @@ export default function Login() {
         </div>
       </div>
 
-      {/* RIGHT SIDE - IMAGE (Hidden on mobile) */}
       <div className="hidden lg:block lg:w-1/2 relative">
         <img
           src="https://api.builder.io/api/v1/image/assets/TEMP/494915144f83153c3908d0ebef3bcd2adc29906d?width=1440"
