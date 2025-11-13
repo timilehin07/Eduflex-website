@@ -1,12 +1,110 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useState } from "react";
 
 export default function VerifyOTP() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const email = location.state?.email || "";
+  const isNewUser = location.state?.isNewUser === true;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    navigate("/dashboard");
-  };
+  const [otp, setOtp] = useState("");
+  const [error, setError] = useState("");
+  const [resendMessage, setResendMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+
+  // Redirect if not a new user (for signup flow)
+if (!isNewUser && !location.state?.isReset) {
+  navigate("/login", { replace: true });
+  return null;
+}
+
+const maskEmail = (email: string) => {
+  if (!email) return "your email";
+  const [username, domain] = email.split("@");
+  const masked = username.length > 5 ? username.substring(0, 5) + "**" : username.substring(0, 2) + "**";
+  return `${masked}@${domain}`;
+};
+
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (otp.length !== 6) {
+    setError("Please enter a 6-digit code");
+    return;
+  }
+
+  setError("");
+  setLoading(true);
+
+  try {
+    const response = await fetch(
+      "https://eduflexbackend.funtech.dev/api-gateway/v1/auth/otp/verify",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          accept: "*/*",
+        },
+        body: JSON.stringify({ email, otp }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (response.ok) {
+      // CHECK IF IT'S PASSWORD RESET FLOW
+      if (location.state?.isReset) {
+        navigate("/change-password", {
+          state: { email, otp }, // Pass OTP to change password
+          replace: true,
+        });
+      } else {
+        // NORMAL SIGNUP FLOW
+        const token = data.token || data.access_token || data.jwt;
+        if (token) localStorage.setItem("authToken", token);
+        navigate("/dashboard", { replace: true });
+      }
+    } else {
+      setError(data.message || "Invalid or expired code");
+    }
+  } catch (err) {
+    setError("Network error. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+};
+
+const handleResend = async () => {
+  setError("");
+  setResendMessage("");
+  setResendLoading(true);
+
+  try {
+    const response = await fetch(
+      "https://eduflexbackend.funtech.dev/api-gateway/v1/auth/otp/resend",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          accept: "*/*",
+        },
+        body: JSON.stringify({ email }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (response.ok) {
+      setResendMessage("New code sent! Check your email.");
+    } else {
+      setError(data.message || "Failed to resend code");
+    }
+  } catch (err) {
+    setError("Network error. Please try again.");
+  } finally {
+    setResendLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen w-full flex bg-white font-host">
@@ -80,7 +178,7 @@ export default function VerifyOTP() {
                   fill="#0AEFC9"
                 />
                 <path
-                  d="M20.417 17.5814H22.7578C22.7578 20.2331 20.596 22.3933 17.9365 22.3933C15.277 22.3933 13.1152 20.2331 13.1152 17.5814H15.4561C15.4561 18.9454 16.5673 20.057 17.9365 20.057C19.3058 20.057 20.417 18.9454 20.417 17.5814Z"
+                  d="M20.417 17.5814H22.7578C22.7578 20.2331 20.596 22.3933 17.9365 22.3933C15.277 22.3933 13.1152 20.2331 13.1152 17.5814H15.4561C15.4561 18.9454 16.5673 20.057 17.9365 20 20.057C19.3058 20.057 20.417 18.9454 20.417 17.5814Z"
                   fill="#6346FA"
                 />
                 <path
@@ -104,7 +202,7 @@ export default function VerifyOTP() {
                     Verify your account
                   </h1>
                   <p className="text-[#838794] font-host text-base font-normal leading-[120%]">
-                    Enter 6-digit code sent to the email ololo**@gmail.com
+                    Enter 6-digit code sent to the email {maskEmail(email)}
                   </p>
                 </div>
 
@@ -134,31 +232,58 @@ export default function VerifyOTP() {
                       <input
                         id="otp"
                         type="text"
-                        placeholder="Enter 6-digit codecodes"
+                        placeholder="Enter 6-digit code"
                         maxLength={6}
+                        value={otp}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/\D/g, "").slice(0, 6);
+                          setOtp(value);
+                        }}
                         className="flex-1 text-[#98A2B3] font-host text-sm font-normal leading-[160%] outline-none placeholder:text-[#98A2B3]"
                         required
+                        disabled={loading}
                       />
                     </div>
                   </div>
+
+                  {error && (
+                    <div className="px-4 py-3 rounded-lg bg-red-50 border border-red-200">
+                      <p className="text-red-800 text-sm font-medium">{error}</p>
+                    </div>
+                  )}
+
+                  {resendMessage && (
+                    <div className="px-4 py-3 rounded-lg bg-green-50 border border-green-200">
+                      <p className="text-green-800 text-sm font-medium">{resendMessage}</p>
+                    </div>
+                  )}
                 </div>
               </div>
 
               <button
                 type="submit"
-                className="flex h-12 px-4 items-center justify-center gap-2 rounded-full bg-brand-purple hover:bg-brand-purple/90 transition-colors shadow-[0_8px_24px_rgba(10,131,255,0.15)]"
+                disabled={loading || otp.length !== 6}
+                className="flex h-12 px-4 items-center justify-center gap-2 rounded-full bg-brand-purple hover:bg-brand-purple/90 transition-colors shadow-[0_8px_24px_rgba(10,131,255,0.15)] disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <span className="text-white font-host text-base font-medium leading-[160%]">
-                  Login Account
-                </span>
+                {loading ? (
+                  <span className="text-white font-host text-base font-medium leading-[160%]">
+                    Verifying...
+                  </span>
+                ) : (
+                  <span className="text-white font-host text-base font-medium leading-[160%]">
+                    Login Account
+                  </span>
+                )}
               </button>
             </div>
 
             <button
               type="button"
-              className="text-[#468FFD] text-center font-host text-base font-normal leading-[120%] hover:underline"
+              onClick={handleResend}
+              disabled={resendLoading}
+              className="text-[#468FFD] text-center font-host text-base font-normal leading-[120%] hover:underline disabled:opacity-50"
             >
-              Resend Code
+              {resendLoading ? "Sending..." : "Resend Code"}
             </button>
           </form>
         </div>
