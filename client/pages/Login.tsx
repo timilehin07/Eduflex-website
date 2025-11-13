@@ -3,28 +3,108 @@ import { Link, useNavigate } from "react-router-dom";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    navigate("/verify-otp");
-  };
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setError("");
+  setIsLoading(true);
+
+  try {
+    const loginRes = await fetch(
+      "https://eduflexbackend.funtech.dev/api-gateway/v1/auth/login",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          accept: "*/*",
+        },
+        body: JSON.stringify({
+          email: email.trim(),
+          password,
+          account_type: "customer",
+        }),
+      }
+    );
+
+    const loginData = await loginRes.json();
+    console.log("LOGIN RESPONSE:", loginData);
+
+    if (loginRes.ok) {
+      // ✅ Get token correctly
+      const token =
+        loginData.data?.tokens?.access ||
+        loginData.data?.tokens?.token ||
+        loginData.data?.tokens?.access_token ||
+        loginData.data?.token ||
+        loginData.token;
+
+      if (token) {
+        // Save token
+        localStorage.setItem("authToken", token);
+
+        // Save user name
+        const name =
+          loginData.data?.user?.first_name ||
+          loginData.data?.user?.firstname ||
+          loginData.data?.user?.name;
+        if (name) localStorage.setItem("userName", name);
+
+        // Redirect
+        navigate("/dashboard", { replace: true });
+        return;
+      } else {
+        setError("Login successful but no token found in tokens object.");
+      }
+    } else if (loginData.message?.toLowerCase().includes("verify")) {
+      const otpRes = await fetch(
+        "https://eduflexbackend.funtech.dev/api-gateway/v1/auth/otp/send",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: email.trim(),
+            account_type: "customer",
+          }),
+        }
+      );
+
+      if (otpRes.ok) {
+        navigate("/verify-otp", {
+          state: { email: email.trim(), isNewUser: true },
+          replace: true,
+        });
+      } else {
+        setError("Failed to send code. Try again.");
+      }
+    } else {
+      setError(loginData.message || "Invalid email or password");
+    }
+  } catch (err) {
+    console.error("Login error:", err);
+    setError("Network error. Try again.");
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   return (
-    <div className="min-h-screen w-full flex bg-white font-host">
-      <div className="w-full lg:w-1/2 bg-brand-dark relative flex items-center justify-center p-6 sm:p-8 lg:p-12">
-        <div
-          className="absolute top-0 left-0 w-[793px] h-[793px] rounded-full opacity-20 -translate-x-[290px] -translate-y-[239px]"
-          style={{
-            background: "#CED671",
-            filter: "blur(198.45px)",
-          }}
-        />
+    <div className="min-h-screen w-full flex bg-white font-host overflow-x-hidden">
+      {/* LEFT SIDE - FORM (Original bg-brand-dark) */}
+      <div className="w-full lg:w-1/2 bg-brand-dark relative flex items-center justify-center p-4 sm:p-6 lg:p-12">
+        {/* REMOVED BLOB — it caused overflow on mobile */}
+        {/* No background blob on mobile to prevent scroll */}
 
-        <div className="relative w-full max-w-[446px] bg-white rounded-3xl border border-[#E7E8E9] p-6 flex flex-col items-center gap-12">
-          <div className="flex items-center justify-center w-[146px] h-[46px]">
+        <div className="relative w-full max-w-md mx-auto bg-white rounded-3xl border border-[#E7E8E9] p-5 sm:p-6 flex flex-col items-center gap-10">
+          {/* Logo */}
+          <div className="w-full max-w-[140px] mx-auto">
             <svg
-              className="w-[128px] h-auto"
+              className="w-full h-auto"
               viewBox="0 0 128 37"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -80,24 +160,22 @@ export default function Login() {
             </svg>
           </div>
 
-          <form onSubmit={handleSubmit} className="w-full flex flex-col gap-12">
-            <div className="flex flex-col gap-[22px]">
-              <div className="flex flex-col gap-7">
+          <form onSubmit={handleSubmit} className="w-full flex flex-col gap-10">
+            <div className="flex flex-col gap-5">
+              <div className="flex flex-col gap-6">
                 <div className="flex flex-col gap-2">
                   <h1 className="text-black font-host text-2xl font-semibold leading-[120%]">
                     Login Your Account
                   </h1>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[#696E7E] font-host text-base font-normal leading-[120%]">
+                  <div className="flex flex-wrap items-center gap-2 text-sm sm:text-base">
+                    <span className="text-[#696E7E] font-host">
                       Don't have an Account
                     </span>
                     <Link
                       to="/signup"
-                      className="flex items-center gap-1 group"
+                      className="flex items-center gap-1 group text-[#035638] hover:underline"
                     >
-                      <span className="text-[#035638] font-host text-base font-normal leading-[120%] group-hover:underline">
-                        Create Account
-                      </span>
+                      <span>Create Account</span>
                       <svg
                         className="w-4 h-4"
                         viewBox="0 0 16 17"
@@ -117,6 +195,14 @@ export default function Login() {
                 </div>
 
                 <div className="flex flex-col gap-4">
+                  {error && (
+                    <div className="px-4 py-3 rounded-lg bg-red-50 border border-red-200">
+                      <p className="text-red-800 text-sm font-medium">
+                        {error}
+                      </p>
+                    </div>
+                  )}
+
                   <div className="flex flex-col gap-1">
                     <label
                       htmlFor="email"
@@ -143,8 +229,11 @@ export default function Login() {
                         id="email"
                         type="email"
                         placeholder="namesurname@gmail.com"
-                        className="flex-1 text-[#98A2B3] font-host text-sm font-normal leading-[160%] outline-none placeholder:text-[#98A2B3]"
+                        className="flex-1 text-[#00000A] font-host text-sm font-normal leading-[160%] outline-none placeholder:text-[#98A2B3]"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                         required
+                        disabled={isLoading}
                       />
                     </div>
                   </div>
@@ -161,13 +250,17 @@ export default function Login() {
                         id="password"
                         type={showPassword ? "text" : "password"}
                         placeholder="Enter your password"
-                        className="flex-1 text-[#98A2B3] font-host text-sm font-normal leading-[160%] outline-none placeholder:text-[#98A2B3]"
+                        className="flex-1 text-[#00000A] font-host text-sm font-normal leading-[160%] outline-none placeholder:text-[#98A2B3]"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                         required
+                        disabled={isLoading}
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
                         className="flex-shrink-0 w-5 h-5"
+                        disabled={isLoading}
                       >
                         <svg
                           viewBox="0 0 20 21"
@@ -185,11 +278,40 @@ export default function Login() {
 
                   <button
                     type="submit"
-                    className="flex h-12 px-4 items-center justify-center gap-2 rounded-full bg-brand-purple hover:bg-brand-purple/90 transition-colors shadow-[0_8px_24px_rgba(10,131,255,0.15)]"
+                    disabled={isLoading}
+                    className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-brand-purple hover:bg-brand-purple/90 transition-colors shadow-[0_8px_24px_rgba(10,131,255,0.15)] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <span className="text-white font-host text-base font-medium leading-[160%]">
-                      Login Account
-                    </span>
+                    {isLoading ? (
+                      <>
+                        <svg
+                          className="animate-spin h-5 w-5 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
+                        </svg>
+                        <span className="text-white font-host text-base font-medium leading-[160%]">
+                          Logging in...
+                        </span>
+                      </>
+                    ) : (
+                      <span className="text-white font-host text-base font-medium leading-[160%]">
+                        Login Account
+                      </span>
+                    )}
                   </button>
                 </div>
               </div>
@@ -205,6 +327,7 @@ export default function Login() {
         </div>
       </div>
 
+      {/* RIGHT SIDE - IMAGE (Hidden on mobile) */}
       <div className="hidden lg:block lg:w-1/2 relative">
         <img
           src="https://api.builder.io/api/v1/image/assets/TEMP/494915144f83153c3908d0ebef3bcd2adc29906d?width=1440"
