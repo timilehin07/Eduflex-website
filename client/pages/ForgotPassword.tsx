@@ -1,30 +1,78 @@
+// client/pages/ForgotPassword.tsx
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 export default function ForgotPassword() {
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    navigate("/reset-password-verify");
+    setError("");
+    setSuccess("");
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(
+        "https://eduflexbackend.funtech.dev/api-gateway/v1/auth/password/forgot",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            accept: "*/*",
+          },
+          body: JSON.stringify({ email: email.trim() }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSuccess("A reset code has been sent to your email.");
+        setTimeout(() => {
+          navigate("/reset-password-verify", { state: { email: email.trim() } });
+        }, 1500);
+        return;
+      }
+
+      let msg = "Something went wrong. Please try again.";
+      if (data.message) {
+        const m = data.message.toLowerCase();
+        if (m.includes("email must be an email") || m.includes("invalid email")) {
+          msg = "Please enter a valid email address.";
+        } else if (m.includes("user not found") || m.includes("not registered")) {
+          msg = "No account found with this email. Please check and try again.";
+        } else {
+          msg = data.message;
+        }
+      }
+      setError(msg);
+    } catch (err) {
+      console.error("Forgot-password error:", err);
+      setError("Network error. Please check your connection.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen w-full flex bg-white font-host">
-      <div className="w-full lg:w-1/2 bg-brand-dark relative flex items-center justify-center p-6 sm:p-8 lg:p-12">
-        <div
-          className="absolute top-0 left-0 w-[793px] h-[793px] rounded-full opacity-20 -translate-x-[290px] -translate-y-[239px]"
-          style={{
-            background: "#CED671",
-            filter: "blur(198.45px)",
-          }}
-        />
+    <div className="min-h-screen w-full flex bg-white font-host overflow-x-hidden">
+      {/* LEFT SIDE - FORM */}
+      <div className="w-full lg:w-1/2 bg-brand-dark relative flex items-center justify-center p-4 sm:p-6 lg:p-12">
+        {/* REMOVED BLOB — caused overflow on mobile */}
+        {/* <div className="absolute ... w-[793px] ..."></div> */}
 
+        {/* BACK BUTTON - Safe on mobile */}
         <Link
           to="/login"
-          className="absolute top-6 left-6 flex items-center gap-1.5 px-3 py-3 rounded bg-white hover:bg-gray-50 transition-colors z-10"
+          className="absolute top-4 left-4 flex items-center gap-1.5 px-3 py-2 rounded bg-white hover:bg-gray-50 transition-colors z-10 text-sm"
         >
           <svg
-            className="w-6 h-6"
+            className="w-5 h-5"
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -37,15 +85,14 @@ export default function ForgotPassword() {
               strokeLinejoin="round"
             />
           </svg>
-          <span className="text-black font-host text-base font-normal leading-[120%]">
-            Go Back
-          </span>
+          <span className="text-black font-host font-normal">Go Back</span>
         </Link>
 
-        <div className="relative w-full max-w-[446px] bg-white rounded-3xl border border-[#E7E8E9] p-6 flex flex-col items-center gap-12">
-          <div className="flex items-center justify-center w-[146px] h-[46px]">
+        <div className="relative w-full max-w-md mx-auto bg-white rounded-3xl border border-[#E7E8E9] p-5 sm:p-6 flex flex-col items-center gap-10">
+          {/* LOGO - Responsive */}
+          <div className="w-full max-w-[140px] mx-auto">
             <svg
-              className="w-[128px] h-auto"
+              className="w-full h-auto"
               viewBox="0 0 128 37"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -90,35 +137,41 @@ export default function ForgotPassword() {
               </g>
               <defs>
                 <clipPath id="clip0_8859_66">
-                  <rect
-                    width="128"
-                    height="35.874"
-                    fill="white"
-                    transform="translate(0 0.5)"
-                  />
+                  <rect width="128" height="35.874" fill="white" transform="translate(0 0.5)" />
                 </clipPath>
               </defs>
             </svg>
           </div>
 
-          <form onSubmit={handleSubmit} className="w-full flex flex-col gap-12">
-            <div className="flex flex-col gap-[22px]">
-              <div className="flex flex-col gap-7">
+          {/* FORM */}
+          <form onSubmit={handleSubmit} className="w-full flex flex-col gap-10">
+            <div className="flex flex-col gap-5">
+              <div className="flex flex-col gap-6">
                 <div className="flex flex-col gap-2">
                   <h1 className="text-black font-host text-2xl font-semibold leading-[120%]">
                     Forgot Password
                   </h1>
                   <p className="text-[#696E7E] font-host text-base font-normal leading-[120%]">
-                    Input the email you on this platform
+                    Input the email you used on this platform
                   </p>
                 </div>
 
                 <div className="flex flex-col gap-4">
+                  {/* ERROR / SUCCESS */}
+                  {error && (
+                    <div className="px-4 py-3 rounded-lg bg-red-50 border border-red-200">
+                      <p className="text-red-800 text-sm font-medium">{error}</p>
+                    </div>
+                  )}
+                  {success && (
+                    <div className="px-4 py-3 rounded-lg bg-green-50 border border-green-200">
+                      <p className="text-green-800 text-sm font-medium">{success}</p>
+                    </div>
+                  )}
+
+                  {/* EMAIL INPUT */}
                   <div className="flex flex-col gap-1">
-                    <label
-                      htmlFor="email"
-                      className="text-[#33363E] font-host text-sm font-medium leading-[160%]"
-                    >
+                    <label htmlFor="email" className="text-[#33363E] font-host text-sm font-medium leading-[160%]">
                       Email Address
                     </label>
                     <div className="flex items-center gap-2 px-3 py-[13px] rounded-[10px] border border-[#E2E4E9] bg-white shadow-[0_1px_2px_0_rgba(228,229,231,0.24)]">
@@ -140,19 +193,52 @@ export default function ForgotPassword() {
                         id="email"
                         type="email"
                         placeholder="namesurname@gmail.com"
-                        className="flex-1 text-[#98A2B3] font-host text-sm font-normal leading-[160%] outline-none placeholder:text-[#98A2B3]"
+                        className="flex-1 text-[#00000A] font-host text-sm font-normal leading-[160%] outline-none placeholder:text-[#98A2B3]"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                         required
+                        disabled={isLoading}
                       />
                     </div>
                   </div>
 
+                  {/* SUBMIT BUTTON - Full Width */}
                   <button
                     type="submit"
-                    className="flex h-12 px-4 items-center justify-center gap-2 rounded-full bg-brand-purple hover:bg-brand-purple/90 transition-colors shadow-[0_8px_24px_rgba(10,131,255,0.15)]"
+                    disabled={isLoading}
+                    className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-brand-purple hover:bg-brand-purple/90 transition-colors shadow-[0_8px_24px_rgba(10,131,255,0.15)] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <span className="text-white font-host text-sm font-medium leading-[20px] tracking-[-0.084px]">
-                      Verify Account
-                    </span>
+                    {isLoading ? (
+                      <>
+                        <svg
+                          className="animate-spin h-5 w-5 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          />
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          />
+                        </svg>
+                        <span className="text-white font-host text-base font-medium leading-[160%]">
+                          Sending…
+                        </span>
+                      </>
+                    ) : (
+                      <span className="text-white font-host text-base font-medium leading-[160%]">
+                        Verify Account
+                      </span>
+                    )}
                   </button>
                 </div>
               </div>
@@ -161,6 +247,7 @@ export default function ForgotPassword() {
         </div>
       </div>
 
+      {/* RIGHT SIDE IMAGE - Hidden on mobile/tablet */}
       <div className="hidden lg:block lg:w-1/2 relative">
         <img
           src="https://api.builder.io/api/v1/image/assets/TEMP/494915144f83153c3908d0ebef3bcd2adc29906d?width=1440"
